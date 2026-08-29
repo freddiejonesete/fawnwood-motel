@@ -1,0 +1,3733 @@
+import React, { useEffect, useMemo, useState } from "react";
+import "./App.css";
+
+const INITIAL_ROOMS = [
+  { id: 1, number: "101", name: "Oak Room", type: "Standard", status: "available", guest: null },
+  { id: 2, number: "102", name: "Fern Room", type: "Standard", status: "available", guest: null },
+  { id: 3, number: "103", name: "Willow Room", type: "Standard", status: "available", guest: null },
+  { id: 4, number: "201", name: "Pine Room", type: "Deluxe", status: "available", guest: null },
+  { id: 5, number: "202", name: "Moss Room", type: "Deluxe", status: "available", guest: null },
+  { id: 6, number: "203", name: "Cedar Room", type: "Deluxe", status: "available", guest: null },
+  { id: 7, number: "301", name: "Fawn Suite", type: "Suite", status: "available", guest: null },
+  { id: 8, number: "302", name: "Woodland Suite", type: "Suite", status: "available", guest: null },
+];
+
+const INITIAL_PROFILES = [
+  {
+    id: 1,
+    name: "Manager",
+    username: "manager",
+    roles: ["Manager"],
+    avatar: "M",
+  },
+  {
+    id: 2,
+    name: "Front Desk",
+    username: "frontdesk",
+    roles: ["Reception"],
+    avatar: "F",
+  },
+  {
+    id: 3,
+    name: "Janitor",
+    username: "janitor",
+    roles: ["Janitor"],
+    avatar: "J",
+  },
+];
+
+const DEFAULT_SETTINGS = {
+  prices: {
+    Standard: 100,
+    Deluxe: 150,
+    Suite: 250,
+  },
+  cleaningGuide: [
+    "Remove all rubbish.",
+    "Change and straighten bedding.",
+    "Clean and sanitise bathroom.",
+    "Clean mirrors and surfaces.",
+    "Restock required amenities.",
+    "Check the room for damage.",
+    "Vacuum or clean the floor.",
+    "Complete a final room inspection.",
+  ],
+  checkInQuestions: [],
+};
+
+function loadData(key, fallback) {
+  try {
+    const saved = localStorage.getItem(key);
+    return saved ? JSON.parse(saved) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function App() {
+  const [profiles, setProfiles] = useState(() =>
+    loadData("fawnwood_profiles", INITIAL_PROFILES)
+  );
+
+  const [rooms, setRooms] = useState(() =>
+    loadData("fawnwood_rooms", INITIAL_ROOMS)
+  );
+
+  const [customers, setCustomers] = useState(() =>
+    loadData("fawnwood_customers", [])
+  );
+
+  const [payments, setPayments] = useState(() =>
+    loadData("fawnwood_payments", [])
+  );
+
+  const [issues, setIssues] = useState(() =>
+    loadData("fawnwood_issues", [])
+  );
+
+  const [settings, setSettings] = useState(() =>
+    loadData("fawnwood_settings", DEFAULT_SETTINGS)
+  );
+
+  const [currentUser, setCurrentUser] = useState(null);
+  const [page, setPage] = useState("dashboard");
+  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [toast, setToast] = useState("");
+
+  useEffect(() => {
+    localStorage.setItem("fawnwood_profiles", JSON.stringify(profiles));
+  }, [profiles]);
+
+  useEffect(() => {
+    localStorage.setItem("fawnwood_rooms", JSON.stringify(rooms));
+  }, [rooms]);
+
+  useEffect(() => {
+    localStorage.setItem("fawnwood_customers", JSON.stringify(customers));
+  }, [customers]);
+
+  useEffect(() => {
+    localStorage.setItem("fawnwood_payments", JSON.stringify(payments));
+  }, [payments]);
+
+  useEffect(() => {
+    localStorage.setItem("fawnwood_issues", JSON.stringify(issues));
+  }, [issues]);
+
+  useEffect(() => {
+    localStorage.setItem("fawnwood_settings", JSON.stringify(settings));
+  }, [settings]);
+
+  function notify(message) {
+    setToast(message);
+    setTimeout(() => setToast(""), 2500);
+  }
+
+  const isManager =
+    currentUser?.roles?.includes("Manager");
+
+  function logout() {
+    setCurrentUser(null);
+    setPage("dashboard");
+  }
+
+  if (!currentUser) {
+    return (
+      <ProfileScreen
+        profiles={profiles}
+        setCurrentUser={setCurrentUser}
+        setProfiles={setProfiles}
+      />
+    );
+  }
+
+  return (
+    <div className="app">
+      <div className="app-shell">
+
+        <header className="topbar">
+          <div>
+            <div className="brand">fawnwood</div>
+            <div className="subtitle">hotel operations</div>
+          </div>
+
+          <button
+            className="profile-button"
+            onClick={logout}
+          >
+            <span>{currentUser.avatar}</span>
+          </button>
+        </header>
+
+        <main className="content">
+
+          {page === "dashboard" && (
+            <Dashboard
+              currentUser={currentUser}
+              rooms={rooms}
+              issues={issues}
+              customers={customers}
+              setPage={setPage}
+            />
+          )}
+
+          {page === "checkin" && (
+            <CheckIn
+              rooms={rooms}
+              setRooms={setRooms}
+              customers={customers}
+              setCustomers={setCustomers}
+              payments={payments}
+              setPayments={setPayments}
+              settings={settings}
+              notify={notify}
+              goBack={() => setPage("dashboard")}
+            />
+          )}
+
+          {page === "rooms" && (
+            <Rooms
+              rooms={rooms}
+              setRooms={setRooms}
+              selectedRoom={selectedRoom}
+              setSelectedRoom={setSelectedRoom}
+              isManager={isManager}
+              notify={notify}
+              goBack={() => setPage("dashboard")}
+            />
+          )}
+
+          {page === "cleaning" && (
+            <Cleaning
+              rooms={rooms}
+              setRooms={setRooms}
+              settings={settings}
+              currentUser={currentUser}
+              notify={notify}
+              goBack={() => setPage("dashboard")}
+            />
+          )}
+
+          {page === "maintenance" && (
+            <Maintenance
+              issues={issues}
+              setIssues={setIssues}
+              currentUser={currentUser}
+              notify={notify}
+              goBack={() => setPage("dashboard")}
+            />
+          )}
+
+          {page === "statistics" && (
+            <Statistics
+              rooms={rooms}
+              customers={customers}
+              payments={payments}
+              issues={issues}
+              goBack={() => setPage("dashboard")}
+            />
+          )}
+
+          {page === "settings" && (
+            <Settings
+              profiles={profiles}
+              setProfiles={setProfiles}
+              rooms={rooms}
+              setRooms={setRooms}
+              settings={settings}
+              setSettings={setSettings}
+              customers={customers}
+              isManager={isManager}
+              notify={notify}
+              goBack={() => setPage("dashboard")}
+            />
+          )}
+
+        </main>
+
+        {page !== "dashboard" && (
+          <nav className="bottom-nav">
+            <button onClick={() => setPage("dashboard")}>
+              <span>⌂</span>
+              Home
+            </button>
+
+            <button onClick={() => setPage("rooms")}>
+              <span>▦</span>
+              Rooms
+            </button>
+
+            <button
+              className="nav-checkin"
+              onClick={() => setPage("checkin")}
+            >
+              <span>＋</span>
+              Check-in
+            </button>
+
+            <button onClick={() => setPage("cleaning")}>
+              <span>✓</span>
+              Cleaning
+            </button>
+
+            <button onClick={() => setPage("maintenance")}>
+              <span>⚒</span>
+              Issues
+            </button>
+          </nav>
+        )}
+
+        {toast && <div className="toast">{toast}</div>}
+      </div>
+    </div>
+  );
+}
+
+
+/* =========================
+   PROFILE SCREEN
+========================= */
+
+function ProfileScreen({ profiles, setCurrentUser, setProfiles }) {
+  const [adding, setAdding] = useState(false);
+  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
+  const [role, setRole] = useState("Reception");
+
+  function addProfile() {
+    if (!name.trim() || !username.trim()) return;
+
+    const profile = {
+      id: Date.now(),
+      name,
+      username,
+      roles: [role],
+      avatar: name.charAt(0).toUpperCase(),
+    };
+
+    setProfiles([...profiles, profile]);
+    setName("");
+    setUsername("");
+    setRole("Reception");
+    setAdding(false);
+  }
+
+  return (
+    <div className="login-screen">
+
+      <div className="login-logo">
+        <div className="brand">fawnwood</div>
+        <p>staff operations</p>
+      </div>
+
+      <div className="login-card">
+        <h1>Who's working?</h1>
+        <p className="muted">
+          Select your staff profile to continue.
+        </p>
+
+        <div className="profile-list">
+          {profiles.map(profile => (
+            <button
+              className="profile-card"
+              key={profile.id}
+              onClick={() => setCurrentUser(profile)}
+            >
+              <div className="avatar">
+                {profile.avatar}
+              </div>
+
+              <div className="profile-info">
+                <strong>{profile.name}</strong>
+                <span>{profile.roles.join(" · ")}</span>
+              </div>
+
+              <span className="arrow">›</span>
+            </button>
+          ))}
+        </div>
+
+        {!adding ? (
+          <button
+            className="secondary-button full"
+            onClick={() => setAdding(true)}
+          >
+            + Add staff profile
+          </button>
+        ) : (
+          <div className="form-card">
+            <h3>New staff profile</h3>
+
+            <input
+              placeholder="Name"
+              value={name}
+              onChange={e => setName(e.target.value)}
+            />
+
+            <input
+              placeholder="Username"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+            />
+
+            <select
+              value={role}
+              onChange={e => setRole(e.target.value)}
+            >
+              <option>Reception</option>
+              <option>Janitor</option>
+              <option>Maintenance</option>
+              <option>Manager</option>
+            </select>
+
+            <button
+              className="primary-button full"
+              onClick={addProfile}
+            >
+              Create profile
+            </button>
+
+            <button
+              className="text-button"
+              onClick={() => setAdding(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+/* =========================
+   DASHBOARD
+========================= */
+
+function Dashboard({
+  currentUser,
+  rooms,
+  issues,
+  customers,
+  setPage
+}) {
+  const occupied = rooms.filter(r => r.status === "occupied").length;
+  const cleaning = rooms.filter(r => r.status === "cleaning").length;
+  const available = rooms.filter(r => r.status === "available").length;
+  const openIssues = issues.filter(i => i.status !== "completed").length;
+
+  return (
+    <div>
+
+      <section className="welcome">
+        <div>
+          <p className="eyebrow">GOOD TO SEE YOU</p>
+          <h1>{currentUser.name}</h1>
+        </div>
+
+        <button
+          className="settings-circle"
+          onClick={() => setPage("settings")}
+        >
+          ⚙
+        </button>
+      </section>
+
+      <section className="hotel-status">
+        <div>
+          <span>Available</span>
+          <strong>{available}</strong>
+        </div>
+
+        <div>
+          <span>Occupied</span>
+          <strong>{occupied}</strong>
+        </div>
+
+        <div>
+          <span>Cleaning</span>
+          <strong>{cleaning}</strong>
+        </div>
+      </section>
+
+      <h2>What do you need?</h2>
+
+      <div className="feature-grid">
+
+        <Feature
+          icon="＋"
+          title="Check-in"
+          description="Check in a guest"
+          onClick={() => setPage("checkin")}
+          featured
+        />
+
+        <Feature
+          icon="▦"
+          title="Rooms"
+          description="View hotel rooms"
+          onClick={() => setPage("rooms")}
+        />
+
+        <Feature
+          icon="✓"
+          title="Cleaning"
+          description={`${cleaning} rooms waiting`}
+          onClick={() => setPage("cleaning")}
+        />
+
+        <Feature
+          icon="⚒"
+          title="Maintenance"
+          description={`${openIssues} open issues`}
+          onClick={() => setPage("maintenance")}
+        />
+
+        <Feature
+          icon="◉"
+          title="Statistics"
+          description={`${customers.length} customers`}
+          onClick={() => setPage("statistics")}
+        />
+
+        <Feature
+          icon="⚙"
+          title="Settings"
+          description="Manage Fawnwood"
+          onClick={() => setPage("settings")}
+        />
+
+      </div>
+    </div>
+  );
+}
+
+function Feature({
+  icon,
+  title,
+  description,
+  onClick,
+  featured
+}) {
+  return (
+    <button
+      className={`feature ${featured ? "featured" : ""}`}
+      onClick={onClick}
+    >
+      <div className="feature-icon">{icon}</div>
+      <strong>{title}</strong>
+      <span>{description}</span>
+    </button>
+  );
+}
+
+
+/* =========================
+   CHECK IN
+========================= */
+
+function CheckIn({
+  rooms,
+  setRooms,
+  customers,
+  setCustomers,
+  payments,
+  setPayments,
+  settings,
+  notify,
+  goBack
+}) {
+  const [step, setStep] = useState(1);
+
+  const [nights, setNights] = useState(1);
+  const [roomType, setRoomType] = useState("Standard");
+  const [board, setBoard] = useState("Room Only");
+  const [selectedRoom, setSelectedRoom] = useState(null);
+
+  const [title, setTitle] = useState("Mr");
+  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
+
+  const [paymentMethod, setPaymentMethod] = useState("Bloxburg Cash");
+
+  const matchingCustomer = useMemo(() => {
+    if (!name && !username) return null;
+
+    return customers.find(
+      c =>
+        c.name.toLowerCase() === name.toLowerCase() ||
+        c.username.toLowerCase() === username.toLowerCase()
+    );
+  }, [customers, name, username]);
+
+  const availableRooms = rooms.filter(
+    room =>
+      room.type === roomType &&
+      room.status === "available"
+  );
+
+  const roomPrice = settings.prices[roomType] || 0;
+  const total = roomPrice * nights;
+
+  function continueRoom() {
+    if (!availableRooms.length) {
+      notify("No rooms of this type are currently available.");
+      return;
+    }
+
+    setSelectedRoom(availableRooms[0]);
+    setStep(2);
+  }
+
+  function completeGuestDetails() {
+    if (!name.trim() || !username.trim()) {
+      notify("Please complete the guest details.");
+      return;
+    }
+
+    setStep(3);
+  }
+
+  function completeCheckIn() {
+    if (!selectedRoom) return;
+
+    const guest = {
+      id: Date.now(),
+      title,
+      name,
+      username,
+      nights,
+      roomType,
+      boardBasis: board,
+      roomNumber: selectedRoom.number,
+      roomName: selectedRoom.name,
+      checkIn: new Date().toISOString(),
+      checkOut: new Date(
+        Date.now() + nights * 86400000
+      ).toISOString(),
+      roomServiceAllowance: 500,
+    };
+
+    setRooms(
+      rooms.map(room =>
+        room.id === selectedRoom.id
+          ? {
+              ...room,
+              status: "occupied",
+              guest,
+            }
+          : room
+      )
+    );
+
+    setCustomers(prev => {
+      const existing = prev.find(
+        c =>
+          c.username.toLowerCase() === username.toLowerCase()
+      );
+
+      if (existing) {
+        return prev.map(c =>
+          c.id === existing.id
+            ? {
+                ...c,
+                visits: (c.visits || 0) + 1,
+                lastStay: guest.checkIn,
+              }
+            : c
+        );
+      }
+
+      return [
+        ...prev,
+        {
+          id: Date.now(),
+          title,
+          name,
+          username,
+          visits: 1,
+          lastStay: guest.checkIn,
+        },
+      ];
+    });
+
+    setPayments([
+      ...payments,
+      {
+        id: Date.now(),
+        guest: name,
+        username,
+        room: selectedRoom.number,
+        amount: total,
+        method: paymentMethod,
+        date: new Date().toISOString(),
+      },
+    ]);
+
+    setStep(4);
+  }
+
+  return (
+    <div>
+
+      <PageHeader
+        title="Guest check-in"
+        subtitle="Front desk"
+        goBack={goBack}
+      />
+
+      <div className="progress">
+        {[1, 2, 3, 4].map(number => (
+          <div
+            key={number}
+            className={step >= number ? "active" : ""}
+          />
+        ))}
+      </div>
+
+      {step === 1 && (
+        <div className="form-section">
+
+          <h2>Stay details</h2>
+
+          <label>How many nights?</label>
+
+          <div className="number-control">
+            <button
+              onClick={() =>
+                setNights(Math.max(1, nights - 1))
+              }
+            >
+              −
+            </button>
+
+            <strong>{nights}</strong>
+
+            <button
+              onClick={() => setNights(nights + 1)}
+            >
+              +
+            </button>
+          </div>
+
+          <label>Room type</label>
+
+          <div className="choice-grid">
+            {Object.keys(settings.prices).map(type => (
+              <button
+                key={type}
+                className={
+                  roomType === type
+                    ? "choice selected"
+                    : "choice"
+                }
+                onClick={() => setRoomType(type)}
+              >
+                <strong>{type}</strong>
+                <span>
+                  {availableRooms.filter(
+                    r => r.type === type
+                  ).length} available
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <label>Board basis</label>
+
+          <div className="stacked-choices">
+            {[
+              "Room Only",
+              "B&B",
+              "B&B + Evening Meal",
+            ].map(option => (
+              <button
+                key={option}
+                className={
+                  board === option
+                    ? "choice-row selected"
+                    : "choice-row"
+                }
+                onClick={() => setBoard(option)}
+              >
+                <span>{option}</span>
+                <span>
+                  {board === option ? "✓" : ""}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <div className="price-box">
+            <span>Estimated stay</span>
+            <strong>
+              {total.toLocaleString()} Bloxburg Cash
+            </strong>
+          </div>
+
+          <button
+            className="primary-button full"
+            onClick={continueRoom}
+          >
+            Find room
+          </button>
+
+        </div>
+      )}
+
+      {step === 2 && (
+        <div className="form-section">
+
+          <h2>Select room</h2>
+
+          <p className="muted">
+            We found these available {roomType.toLowerCase()} rooms.
+          </p>
+
+          <div className="room-list">
+            {availableRooms.map(room => (
+              <button
+                key={room.id}
+                className={
+                  selectedRoom?.id === room.id
+                    ? "room-select selected"
+                    : "room-select"
+                }
+                onClick={() => setSelectedRoom(room)}
+              >
+                <div>
+                  <strong>{room.number}</strong>
+                  <span>{room.name}</span>
+                </div>
+
+                <div>
+                  <small>{room.type}</small>
+                  <span>
+                    {selectedRoom?.id === room.id
+                      ? "✓"
+                      : "Available"}
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          <button
+            className="primary-button full"
+            disabled={!selectedRoom}
+            onClick={() => setStep(2.5)}
+          >
+            Continue
+          </button>
+
+        </div>
+      )}
+
+      {step === 2.5 && (
+        <div className="form-section">
+
+          <h2>Guest details</h2>
+
+          {matchingCustomer && (
+            <div className="previous-customer">
+              <div className="celebration">✦</div>
+              <div>
+                <strong>Previous customer</strong>
+                <p>
+                  Welcome back, {matchingCustomer.name}!
+                </p>
+              </div>
+            </div>
+          )}
+
+          <label>Title</label>
+
+          <select
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+          >
+            <option>Mr</option>
+            <option>Mrs</option>
+            <option>Ms</option>
+            <option>Miss</option>
+            <option>Dr</option>
+          </select>
+
+          <label>Name</label>
+
+          <input
+            placeholder="Guest name"
+            value={name}
+            onChange={e => setName(e.target.value)}
+          />
+
+          <label>Username</label>
+
+          <input
+            placeholder="Bloxburg username"
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+          />
+
+          {settings.checkInQuestions.map((question, index) => (
+            <div key={index}>
+              <label>{question}</label>
+              <input placeholder="Answer" />
+            </div>
+          ))}
+
+          <button
+            className="primary-button full"
+            onClick={completeGuestDetails}
+          >
+            Continue to payment
+          </button>
+
+        </div>
+      )}
+
+      {step === 3 && (
+        <div className="form-section">
+
+          <h2>Payment</h2>
+
+          <div className="booking-summary">
+            <div>
+              <span>Guest</span>
+              <strong>{title} {name}</strong>
+            </div>
+
+            <div>
+              <span>Room</span>
+              <strong>
+                {selectedRoom?.number} · {selectedRoom?.name}
+              </strong>
+            </div>
+
+            <div>
+              <span>Stay</span>
+              <strong>
+                {nights} night{nights !== 1 ? "s" : ""}
+              </strong>
+            </div>
+
+            <div>
+              <span>Board</span>
+              <strong>{board}</strong>
+            </div>
+
+            <div className="summary-total">
+              <span>Total</span>
+              <strong>
+                {total.toLocaleString()} Bloxburg Cash
+              </strong>
+            </div>
+          </div>
+
+          <label>Payment method</label>
+
+          <div className="stacked-choices">
+            {[
+              "Bloxburg Cash",
+              "Card",
+              "Other",
+            ].map(method => (
+              <button
+                key={method}
+                className={
+                  paymentMethod === method
+                    ? "choice-row selected"
+                    : "choice-row"
+                }
+                onClick={() => setPaymentMethod(method)}
+              >
+                <span>{method}</span>
+                <span>
+                  {paymentMethod === method ? "✓" : ""}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <div className="included-box">
+            <strong>Room service included</strong>
+            <span>
+              Up to 500 Bloxburg Cash
+            </span>
+          </div>
+
+          <button
+            className="primary-button full"
+            onClick={completeCheckIn}
+          >
+            Take payment & check in
+          </button>
+
+        </div>
+      )}
+
+      {step === 4 && (
+        <div className="success-screen">
+
+          <div className="success-icon">✓</div>
+
+          <p className="eyebrow">CHECK-IN COMPLETE</p>
+
+          <h1>Welcome to Fawnwood.</h1>
+
+          <p>
+            {name} is now checked into room{" "}
+            <strong>{selectedRoom?.number}</strong>.
+          </p>
+
+          <div className="confirmation">
+            <strong>{selectedRoom?.name}</strong>
+            <span>{board}</span>
+            <span>
+              {nights} night{nights !== 1 ? "s" : ""}
+            </span>
+          </div>
+
+          <button
+            className="primary-button full"
+            onClick={goBack}
+          >
+            Return to dashboard
+          </button>
+
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+/* =========================
+   ROOMS
+========================= */
+
+function Rooms({
+  rooms,
+  setRooms,
+  selectedRoom,
+  setSelectedRoom,
+  isManager,
+  notify,
+  goBack
+}) {
+  const [filter, setFilter] = useState("all");
+
+  const filteredRooms =
+    filter === "all"
+      ? rooms
+      : rooms.filter(r => r.status === filter);
+
+  function changeOccupancy(room, status) {
+    setRooms(
+      rooms.map(r =>
+        r.id === room.id
+          ? { ...r, status }
+          : r
+      )
+    );
+
+    notify("Room status updated.");
+  }
+
+  return (
+    <div>
+
+      <PageHeader
+        title="Rooms"
+        subtitle="Hotel room map"
+        goBack={goBack}
+      />
+
+      <div className="filter-scroll">
+        {[
+          ["all", "All"],
+          ["available", "Available"],
+          ["occupied", "Occupied"],
+          ["cleaning", "Cleaning"],
+        ].map(([value, label]) => (
+          <button
+            key={value}
+            className={filter === value ? "filter active" : "filter"}
+            onClick={() => setFilter(value)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      <div className="room-map">
+        {filteredRooms.map(room => (
+          <button
+            key={room.id}
+            className={`map-room ${room.status}`}
+            onClick={() => setSelectedRoom(room)}
+          >
+            <strong>{room.number}</strong>
+            <span>{room.name}</span>
+            <small>{room.type}</small>
+            <em>
+              {room.status === "available"
+                ? "Available"
+                : room.status === "occupied"
+                ? "Occupied"
+                : "Cleaning"}
+            </em>
+          </button>
+        ))}
+      </div>
+
+      {isManager && (
+        <button
+          className="secondary-button full"
+          onClick={() => notify("Add room controls are available in Settings.")}
+        >
+          + Manage rooms
+        </button>
+      )}
+
+      {selectedRoom && (
+        <RoomDetails
+          room={selectedRoom}
+          close={() => setSelectedRoom(null)}
+          isManager={isManager}
+          changeOccupancy={changeOccupancy}
+        />
+      )}
+
+    </div>
+  );
+}
+
+function RoomDetails({
+  room,
+  close,
+  changeOccupancy
+}) {
+  return (
+    <div className="modal-backdrop" onClick={close}>
+      <div
+        className="modal"
+        onClick={e => e.stopPropagation()}
+      >
+
+        <button className="modal-close" onClick={close}>
+          ×
+        </button>
+
+        <p className="eyebrow">ROOM {room.number}</p>
+
+        <h2>{room.name}</h2>
+
+        <p className="muted">{room.type}</p>
+
+        <div className="status-pill">
+          {room.status}
+        </div>
+
+        {room.guest ? (
+          <div className="guest-details">
+
+            <h3>Current guest</h3>
+
+            <Detail label="Name">
+              {room.guest.title} {room.guest.name}
+            </Detail>
+
+            <Detail label="Username">
+              {room.guest.username}
+            </Detail>
+
+            <Detail label="Board basis">
+              {room.guest.boardBasis}
+            </Detail>
+
+            <Detail label="Nights">
+              {room.guest.nights}
+            </Detail>
+
+            <Detail label="Room service">
+              500 Bloxburg Cash included
+            </Detail>
+
+          </div>
+        ) : (
+          <p className="muted">
+            No current guest.
+          </p>
+        )}
+
+        <h3>Occupancy</h3>
+
+        <div className="button-row">
+
+          <button
+            className="secondary-button"
+            onClick={() =>
+              changeOccupancy(room, "available")
+            }
+          >
+            Available
+          </button>
+
+          <button
+            className="secondary-button"
+            onClick={() =>
+              changeOccupancy(room, "cleaning")
+            }
+          >
+            Cleaning
+          </button>
+
+          <button
+            className="secondary-button"
+            onClick={() =>
+              changeOccupancy(room, "occupied")
+            }
+          >
+            Occupied
+          </button>
+
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+
+/* =========================
+   CLEANING
+========================= */
+
+function Cleaning({
+  rooms,
+  setRooms,
+  settings,
+  notify,
+  goBack
+}) {
+  const cleaningRooms = rooms.filter(
+    room => room.status === "cleaning"
+  );
+
+  const [selected, setSelected] = useState(null);
+
+  function markClean(room) {
+    setRooms(
+      rooms.map(r =>
+        r.id === room.id
+          ? {
+              ...r,
+              status: "available",
+              guest: null,
+            }
+          : r
+      )
+    );
+
+    setSelected(null);
+    notify(`Room ${room.number} is now available.`);
+  }
+
+  return (
+    <div>
+
+      <PageHeader
+        title="Cleaning"
+        subtitle="Housekeeping checklist"
+        goBack={goBack}
+      />
+
+      <div className="cleaning-banner">
+        <strong>{cleaningRooms.length}</strong>
+        <span>rooms require cleaning</span>
+      </div>
+
+      {cleaningRooms.length === 0 ? (
+        <Empty
+          icon="✓"
+          title="All caught up"
+          text="There are currently no rooms waiting to be cleaned."
+        />
+      ) : (
+        <div className="task-list">
+          {cleaningRooms.map(room => (
+            <button
+              className="task"
+              key={room.id}
+              onClick={() => setSelected(room)}
+            >
+              <div className="task-icon">✓</div>
+
+              <div>
+                <strong>
+                  {room.number} · {room.name}
+                </strong>
+                <span>{room.type}</span>
+              </div>
+
+              <span className="arrow">›</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="guide-card">
+
+        <div className="guide-header">
+          <div>
+            <p className="eyebrow">STANDARD</p>
+            <h2>Cleaning guide</h2>
+          </div>
+          <span>i</span>
+        </div>
+
+        {settings.cleaningGuide.map(
+          (item, index) => (
+            <div className="guide-row" key={index}>
+              <span>{index + 1}</span>
+              <p>{item}</p>
+            </div>
+          )
+        )}
+
+      </div>
+
+      {selected && (
+        <CleaningModal
+          room={selected}
+          guide={settings.cleaningGuide}
+          close={() => setSelected(null)}
+          complete={() => markClean(selected)}
+        />
+      )}
+
+    </div>
+  );
+}
+
+function CleaningModal({
+  room,
+  guide,
+  close,
+  complete
+}) {
+  const [checks, setChecks] = useState(
+    guide.map(() => false)
+  );
+
+  const completeAllowed = checks.every(Boolean);
+
+  function toggle(index) {
+    setChecks(
+      checks.map((value, i) =>
+        i === index ? !value : value
+      )
+    );
+  }
+
+  return (
+    <div className="modal-backdrop">
+      <div className="modal">
+
+        <button className="modal-close" onClick={close}>
+          ×
+        </button>
+
+        <p className="eyebrow">CLEANING ROOM</p>
+
+        <h2>
+          {room.number} · {room.name}
+        </h2>
+
+        <div className="checklist">
+
+          {guide.map((item, index) => (
+            <button
+              key={index}
+              className={
+                checks[index]
+                  ? "check-row checked"
+                  : "check-row"
+              }
+              onClick={() => toggle(index)}
+            >
+              <span>
+                {checks[index] ? "✓" : ""}
+              </span>
+
+              <p>{item}</p>
+            </button>
+          ))}
+
+        </div>
+
+        <button
+          className="primary-button full"
+          disabled={!completeAllowed}
+          onClick={complete}
+        >
+          Mark room clean
+        </button>
+
+      </div>
+    </div>
+  );
+}
+
+
+/* =========================
+   MAINTENANCE
+========================= */
+
+function Maintenance({
+  issues,
+  setIssues,
+  currentUser,
+  notify,
+  goBack
+}) {
+  const [reporting, setReporting] = useState(false);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [room, setRoom] = useState("");
+
+  function reportIssue() {
+    if (!title.trim()) return;
+
+    setIssues([
+      ...issues,
+      {
+        id: Date.now(),
+        title,
+        description,
+        room,
+        reportedBy: currentUser.name,
+        status: "open",
+        date: new Date().toISOString(),
+      },
+    ]);
+
+    setTitle("");
+    setDescription("");
+    setRoom("");
+    setReporting(false);
+    notify("Issue reported.");
+  }
+
+  function updateIssue(id, status) {
+    setIssues(
+      issues.map(issue =>
+        issue.id === id
+          ? { ...issue, status }
+          : issue
+      )
+    );
+  }
+
+  return (
+    <div>
+
+      <PageHeader
+        title="Maintenance"
+        subtitle="Issues & repairs"
+        goBack={goBack}
+      />
+
+      <button
+        className="primary-button full"
+        onClick={() => setReporting(true)}
+      >
+        + Report an issue
+      </button>
+
+      <div className="issue-list">
+
+        {issues.length === 0 ? (
+          <Empty
+            icon="✓"
+            title="No issues"
+            text="Nothing has been reported."
+          />
+        ) : (
+          issues.map(issue => (
+            <div className="issue-card" key={issue.id}>
+
+              <div className="issue-top">
+                <div>
+                  <strong>{issue.title}</strong>
+                  <span>
+                    {issue.room
+                      ? `Room ${issue.room}`
+                      : "General"}
+                  </span>
+                </div>
+
+                <span
+                  className={`issue-status ${issue.status}`}
+                >
+                  {issue.status}
+                </span>
+              </div>
+
+              {issue.description && (
+                <p>{issue.description}</p>
+              )}
+
+              <small>
+                Reported by {issue.reportedBy}
+              </small>
+
+              {issue.status !== "completed" && (
+                <div className="button-row">
+
+                  {issue.status === "open" && (
+                    <button
+                      className="secondary-button"
+                      onClick={() =>
+                        updateIssue(
+                          issue.id,
+                          "in progress"
+                        )
+                      }
+                    >
+                      Start repair
+                    </button>
+                  )}
+
+                  <button
+                    className="primary-button"
+                    onClick={() =>
+                      updateIssue(
+                        issue.id,
+                        "completed"
+                      )
+                    }
+                  >
+                    Complete
+                  </button>
+
+                </div>
+              )}
+
+            </div>
+          ))
+        )}
+
+      </div>
+
+      {reporting && (
+        <div className="modal-backdrop">
+          <div className="modal">
+
+            <button
+              className="modal-close"
+              onClick={() => setReporting(false)}
+            >
+              ×
+            </button>
+
+            <h2>Report issue</h2>
+
+            <label>Issue</label>
+
+            <input
+              placeholder="e.g. Broken light"
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+            />
+
+            <label>Room</label>
+
+            <input
+              placeholder="Room number (optional)"
+              value={room}
+              onChange={e => setRoom(e.target.value)}
+            />
+
+            <label>Description</label>
+
+            <textarea
+              placeholder="Describe the problem..."
+              value={description}
+              onChange={e =>
+                setDescription(e.target.value)
+              }
+            />
+
+            <button
+              className="primary-button full"
+              onClick={reportIssue}
+            >
+              Submit issue
+            </button>
+
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}
+
+
+/* =========================
+   STATISTICS
+========================= */
+
+function Statistics({
+  rooms,
+  customers,
+  payments,
+  issues,
+  goBack
+}) {
+  const totalRevenue = payments.reduce(
+    (sum, payment) => sum + Number(payment.amount || 0),
+    0
+  );
+
+  const occupied = rooms.filter(
+    r => r.status === "occupied"
+  ).length;
+
+  const totalStays = customers.reduce(
+    (sum, customer) =>
+      sum + Number(customer.visits || 0),
+    0
+  );
+
+  return (
+    <div>
+
+      <PageHeader
+        title="Statistics"
+        subtitle="All-time hotel performance"
+        goBack={goBack}
+      />
+
+      <div className="stats-grid">
+
+        <Stat
+          label="Customers"
+          value={customers.length}
+        />
+
+        <Stat
+          label="Total stays"
+          value={totalStays}
+        />
+
+        <Stat
+          label="Payments"
+          value={payments.length}
+        />
+
+        <Stat
+          label="Revenue"
+          value={`${totalRevenue.toLocaleString()} B$`}
+        />
+
+        <Stat
+          label="Rooms"
+          value={rooms.length}
+        />
+
+        <Stat
+          label="Currently occupied"
+          value={occupied}
+        />
+
+      </div>
+
+      <div className="stat-section">
+
+        <h2>Rooms used</h2>
+
+        {rooms.map(room => {
+          const uses = customers.filter(
+            c => c.lastRoom === room.number
+          ).length;
+
+          return (
+            <div className="stat-row" key={room.id}>
+              <div>
+                <strong>{room.number}</strong>
+                <span>{room.name}</span>
+              </div>
+
+              <strong>{uses}</strong>
+            </div>
+          );
+        })}
+
+      </div>
+
+      <div className="stat-section">
+
+        <h2>Payment history</h2>
+
+        {payments.length === 0 ? (
+          <p className="muted">
+            No payments recorded yet.
+          </p>
+        ) : (
+          payments.slice().reverse().map(payment => (
+            <div className="stat-row" key={payment.id}>
+              <div>
+                <strong>{payment.guest}</strong>
+                <span>
+                  Room {payment.room}
+                </span>
+              </div>
+
+              <strong>
+                {Number(payment.amount).toLocaleString()} B$
+              </strong>
+            </div>
+          ))
+        )}
+
+      </div>
+
+    </div>
+  );
+}
+
+function Stat({ label, value }) {
+  return (
+    <div className="stat-card">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+
+/* =========================
+   SETTINGS
+========================= */
+
+function Settings({
+  profiles,
+  setProfiles,
+  rooms,
+  setRooms,
+  settings,
+  setSettings,
+  customers,
+  isManager,
+  notify,
+  goBack
+}) {
+  const [section, setSection] = useState("general");
+
+  if (!isManager) {
+    return (
+      <div>
+        <PageHeader
+          title="Settings"
+          subtitle="Manager access required"
+          goBack={goBack}
+        />
+
+        <div className="locked">
+          <div>🔒</div>
+          <h2>Manager only</h2>
+          <p>
+            Only a Fawnwood manager can change system settings.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+
+      <PageHeader
+        title="Settings"
+        subtitle="Fawnwood control centre"
+        goBack={goBack}
+      />
+
+      <div className="settings-tabs">
+
+        {[
+          ["general", "General"],
+          ["rooms", "Rooms"],
+          ["cleaning", "Cleaning"],
+          ["checkin", "Check-in"],
+          ["staff", "Staff"],
+          ["customers", "Customers"],
+        ].map(([value, label]) => (
+          <button
+            key={value}
+            className={
+              section === value
+                ? "setting-tab active"
+                : "setting-tab"
+            }
+            onClick={() => setSection(value)}
+          >
+            {label}
+          </button>
+        ))}
+
+      </div>
+
+      {section === "general" && (
+        <SettingsGeneral
+          settings={settings}
+          setSettings={setSettings}
+          notify={notify}
+        />
+      )}
+
+      {section === "rooms" && (
+        <SettingsRooms
+          rooms={rooms}
+          setRooms={setRooms}
+          notify={notify}
+        />
+      )}
+
+      {section === "cleaning" && (
+        <SettingsCleaning
+          settings={settings}
+          setSettings={setSettings}
+          notify={notify}
+        />
+      )}
+
+      {section === "checkin" && (
+        <SettingsCheckIn
+          settings={settings}
+          setSettings={setSettings}
+          notify={notify}
+        />
+      )}
+
+      {section === "staff" && (
+        <SettingsStaff
+          profiles={profiles}
+          setProfiles={setProfiles}
+          notify={notify}
+        />
+      )}
+
+      {section === "customers" && (
+        <CustomerDatabase customers={customers} />
+      )}
+
+    </div>
+  );
+}
+
+
+/* =========================
+   SETTINGS: GENERAL
+========================= */
+
+function SettingsGeneral({
+  settings,
+  setSettings,
+  notify
+}) {
+  return (
+    <div className="settings-section">
+
+      <h2>Room pricing</h2>
+
+      {Object.entries(settings.prices).map(
+        ([type, price]) => (
+          <div className="setting-row" key={type}>
+            <div>
+              <strong>{type}</strong>
+              <span>Price per night</span>
+            </div>
+
+            <input
+              className="small-input"
+              type="number"
+              value={price}
+              onChange={e =>
+                setSettings({
+                  ...settings,
+                  prices: {
+                    ...settings.prices,
+                    [type]: Number(e.target.value),
+                  },
+                })
+              }
+            />
+          </div>
+        )
+      )}
+
+      <button
+        className="primary-button full"
+        onClick={() => notify("Settings saved.")}
+      >
+        Save changes
+      </button>
+
+    </div>
+  );
+}
+
+
+/* =========================
+   SETTINGS: ROOMS
+========================= */
+
+function SettingsRooms({
+  rooms,
+  setRooms,
+  notify
+}) {
+  const [adding, setAdding] = useState(false);
+
+  const [number, setNumber] = useState("");
+  const [name, setName] = useState("");
+  const [type, setType] = useState("Standard");
+
+  function addRoom() {
+    if (!number || !name) return;
+
+    setRooms([
+      ...rooms,
+      {
+        id: Date.now(),
+        number,
+        name,
+        type,
+        status: "available",
+        guest: null,
+      },
+    ]);
+
+    setNumber("");
+    setName("");
+    setType("Standard");
+    setAdding(false);
+    notify("Room added.");
+  }
+
+  function updateRoom(id, field, value) {
+    setRooms(
+      rooms.map(room =>
+        room.id === id
+          ? { ...room, [field]: value }
+          : room
+      )
+    );
+  }
+
+  function deleteRoom(id) {
+    setRooms(
+      rooms.filter(room => room.id !== id)
+    );
+
+    notify("Room removed.");
+  }
+
+  return (
+    <div className="settings-section">
+
+      <div className="section-heading">
+        <div>
+          <h2>Room management</h2>
+          <p>Only managers can change these.</p>
+        </div>
+
+        <button
+          className="small-add"
+          onClick={() => setAdding(true)}
+        >
+          +
+        </button>
+      </div>
+
+      {rooms.map(room => (
+        <div className="editable-room" key={room.id}>
+
+          <div className="room-edit-grid">
+
+            <input
+              value={room.number}
+              onChange={e =>
+                updateRoom(
+                  room.id,
+                  "number",
+                  e.target.value
+                )
+              }
+            />
+
+            <input
+              value={room.name}
+              onChange={e =>
+                updateRoom(
+                  room.id,
+                  "name",
+                  e.target.value
+                )
+              }
+            />
+
+            <select
+              value={room.type}
+              onChange={e =>
+                updateRoom(
+                  room.id,
+                  "type",
+                  e.target.value
+                )
+              }
+            >
+              <option>Standard</option>
+              <option>Deluxe</option>
+              <option>Suite</option>
+            </select>
+
+          </div>
+
+          <button
+            className="delete-button"
+            onClick={() => deleteRoom(room.id)}
+          >
+            Delete room
+          </button>
+
+        </div>
+      ))}
+
+      {adding && (
+        <div className="form-card">
+
+          <h3>Add room</h3>
+
+          <input
+            placeholder="Room number"
+            value={number}
+            onChange={e => setNumber(e.target.value)}
+          />
+
+          <input
+            placeholder="Room name"
+            value={name}
+            onChange={e => setName(e.target.value)}
+          />
+
+          <select
+            value={type}
+            onChange={e => setType(e.target.value)}
+          >
+            <option>Standard</option>
+            <option>Deluxe</option>
+            <option>Suite</option>
+          </select>
+
+          <button
+            className="primary-button full"
+            onClick={addRoom}
+          >
+            Add room
+          </button>
+
+        </div>
+      )}
+
+    </div>
+  );
+}
+
+
+/* =========================
+   SETTINGS: CLEANING
+========================= */
+
+function SettingsCleaning({
+  settings,
+  setSettings,
+  notify
+}) {
+  const [newItem, setNewItem] = useState("");
+
+  function addItem() {
+    if (!newItem.trim()) return;
+
+    setSettings({
+      ...settings,
+      cleaningGuide: [
+        ...settings.cleaningGuide,
+        newItem,
+      ],
+    });
+
+    setNewItem("");
+  }
+
+  function removeItem(index) {
+    setSettings({
+      ...settings,
+      cleaningGuide:
+        settings.cleaningGuide.filter(
+          (_, i) => i !== index
+        ),
+    });
+  }
+
+  return (
+    <div className="settings-section">
+
+      <h2>Cleaning guide</h2>
+
+      <p className="muted">
+        This guide is shown to janitors when completing rooms.
+      </p>
+
+      {settings.cleaningGuide.map(
+        (item, index) => (
+          <div className="editable-guide" key={index}>
+
+            <input
+              value={item}
+              onChange={e => {
+                const copy = [
+                  ...settings.cleaningGuide,
+                ];
+
+                copy[index] = e.target.value;
+
+                setSettings({
+                  ...settings,
+                  cleaningGuide: copy,
+                });
+              }}
+            />
+
+            <button
+              onClick={() => removeItem(index)}
+            >
+              ×
+            </button>
+
+          </div>
+        )
+      )}
+
+      <div className="add-guide">
+
+        <input
+          placeholder="Add cleaning standard..."
+          value={newItem}
+          onChange={e => setNewItem(e.target.value)}
+        />
+
+        <button onClick={addItem}>Add</button>
+
+      </div>
+
+      <button
+        className="primary-button full"
+        onClick={() => notify("Cleaning guide saved.")}
+      >
+        Save guide
+      </button>
+
+    </div>
+  );
+}
+
+
+/* =========================
+   SETTINGS: CHECK-IN
+========================= */
+
+function SettingsCheckIn({
+  settings,
+  setSettings,
+  notify
+}) {
+  const [question, setQuestion] = useState("");
+
+  function addQuestion() {
+    if (!question.trim()) return;
+
+    setSettings({
+      ...settings,
+      checkInQuestions: [
+        ...settings.checkInQuestions,
+        question,
+      ],
+    });
+
+    setQuestion("");
+  }
+
+  return (
+    <div className="settings-section">
+
+      <h2>Check-in questions</h2>
+
+      <p className="muted">
+        Add questions that reception must ask during check-in.
+      </p>
+
+      {settings.checkInQuestions.map(
+        (question, index) => (
+          <div className="editable-guide" key={index}>
+            <span>{question}</span>
+
+            <button
+              onClick={() =>
+                setSettings({
+                  ...settings,
+                  checkInQuestions:
+                    settings.checkInQuestions.filter(
+                      (_, i) => i !== index
+                    ),
+                })
+              }
+            >
+              ×
+            </button>
+          </div>
+        )
+      )}
+
+      <div className="add-guide">
+
+        <input
+          placeholder="New question..."
+          value={question}
+          onChange={e => setQuestion(e.target.value)}
+        />
+
+        <button onClick={addQuestion}>
+          Add
+        </button>
+
+      </div>
+
+      <button
+        className="primary-button full"
+        onClick={() => notify("Check-in settings saved.")}
+      >
+        Save questions
+      </button>
+
+    </div>
+  );
+}
+
+
+/* =========================
+   SETTINGS: STAFF
+========================= */
+
+function SettingsStaff({
+  profiles,
+  setProfiles,
+  notify
+}) {
+  function changeRole(id, role) {
+    setProfiles(
+      profiles.map(profile =>
+        profile.id === id
+          ? {
+              ...profile,
+              roles: [role],
+            }
+          : profile
+      )
+    );
+
+    notify("Staff role updated.");
+  }
+
+  return (
+    <div className="settings-section">
+
+      <h2>Staff profiles</h2>
+
+      {profiles.map(profile => (
+        <div className="staff-setting" key={profile.id}>
+
+          <div className="avatar small">
+            {profile.avatar}
+          </div>
+
+          <div>
+            <strong>{profile.name}</strong>
+            <span>@{profile.username}</span>
+          </div>
+
+          <select
+            value={profile.roles[0]}
+            onChange={e =>
+              changeRole(
+                profile.id,
+                e.target.value
+              )
+            }
+          >
+            <option>Reception</option>
+            <option>Janitor</option>
+            <option>Maintenance</option>
+            <option>Manager</option>
+          </select>
+
+        </div>
+      ))}
+
+    </div>
+  );
+}
+
+
+/* =========================
+   CUSTOMER DATABASE
+========================= */
+
+function CustomerDatabase({ customers }) {
+  const [search, setSearch] = useState("");
+
+  const filtered = customers.filter(
+    customer =>
+      customer.name
+        .toLowerCase()
+        .includes(search.toLowerCase()) ||
+      customer.username
+        .toLowerCase()
+        .includes(search.toLowerCase())
+  );
+
+  return (
+    <div className="settings-section">
+
+      <h2>Customer database</h2>
+
+      <p className="muted">
+        Everyone who has stayed at Fawnwood.
+      </p>
+
+      <input
+        placeholder="Search customers..."
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+      />
+
+      <div className="customer-list">
+
+        {filtered.length === 0 ? (
+          <Empty
+            icon="◯"
+            title="No customers"
+            text="No matching customers were found."
+          />
+        ) : (
+          filtered.map(customer => (
+            <div
+              className="customer-card"
+              key={customer.id}
+            >
+              <div className="avatar small">
+                {customer.name.charAt(0)}
+              </div>
+
+              <div>
+                <strong>
+                  {customer.title} {customer.name}
+                </strong>
+
+                <span>
+                  @{customer.username}
+                </span>
+
+                <small>
+                  {customer.visits || 1} stay
+                  {(customer.visits || 1) !== 1
+                    ? "s"
+                    : ""}
+                </small>
+              </div>
+            </div>
+          ))
+        )}
+
+      </div>
+
+    </div>
+  );
+}
+
+
+/* =========================
+   COMPONENTS
+========================= */
+
+function PageHeader({
+  title,
+  subtitle,
+  goBack
+}) {
+  return (
+    <div className="page-header">
+
+      <button
+        className="back-button"
+        onClick={goBack}
+      >
+        ‹
+      </button>
+
+      <div>
+        <h1>{title}</h1>
+        <p>{subtitle}</p>
+      </div>
+
+    </div>
+  );
+}
+
+function Detail({ label, children }) {
+  return (
+    <div className="detail">
+      <span>{label}</span>
+      <strong>{children}</strong>
+    </div>
+  );
+}
+
+function Empty({
+  icon,
+  title,
+  text
+}) {
+  return (
+    <div className="empty">
+      <div>{icon}</div>
+      <h3>{title}</h3>
+      <p>{text}</p>
+    </div>
+  );
+}
+
+
+/* =========================
+   APP STYLES
+========================= */
+
+const styles = `
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+  color: #172018;
+  background: #f5f6f2;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f5f6f2;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.app {
+  min-height: 100vh;
+  background: #f5f6f2;
+}
+
+.app-shell {
+  max-width: 620px;
+  min-height: 100vh;
+  margin: auto;
+  background: #f5f6f2;
+  position: relative;
+}
+
+.content {
+  padding: 22px 18px 100px;
+}
+
+.topbar {
+  padding: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(245,246,242,.95);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.brand {
+  font-size: 27px;
+  font-weight: 800;
+  letter-spacing: -1.5px;
+}
+
+.subtitle {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  opacity: .55;
+  margin-top: 1px;
+}
+
+.profile-button {
+  border: 0;
+  background: white;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  box-shadow: 0 3px 15px rgba(0,0,0,.07);
+}
+
+.profile-button span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.welcome {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 10px 0 24px;
+}
+
+.welcome h1 {
+  margin: 3px 0;
+  font-size: 30px;
+  letter-spacing: -1px;
+}
+
+.eyebrow {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  opacity: .45;
+  margin: 0;
+}
+
+.settings-circle {
+  border: 0;
+  background: white;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  font-size: 19px;
+}
+
+.hotel-status {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: #1e2b20;
+  color: white;
+  border-radius: 22px;
+  padding: 18px 8px;
+  margin-bottom: 30px;
+}
+
+.hotel-status div {
+  text-align: center;
+}
+
+.hotel-status span {
+  display: block;
+  font-size: 11px;
+  opacity: .65;
+  margin-bottom: 5px;
+}
+
+.hotel-status strong {
+  font-size: 23px;
+}
+
+h2 {
+  font-size: 21px;
+  letter-spacing: -.5px;
+  margin: 0 0 15px;
+}
+
+h3 {
+  margin: 18px 0 10px;
+}
+
+.muted {
+  opacity: .55;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.feature {
+  border: 0;
+  background: white;
+  border-radius: 21px;
+  padding: 18px;
+  min-height: 140px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 3px 16px rgba(0,0,0,.035);
+}
+
+.feature.featured {
+  background: #1e2b20;
+  color: white;
+}
+
+.feature-icon {
+  width: 39px;
+  height: 39px;
+  border-radius: 13px;
+  background: #edf0ea;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+}
+
+.featured .feature-icon {
+  background: rgba(255,255,255,.13);
+}
+
+.feature strong {
+  font-size: 17px;
+}
+
+.feature span {
+  font-size: 12px;
+  opacity: .55;
+}
+
+.featured span {
+  opacity: .65;
+}
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 620px;
+  width: 100%;
+  background: rgba(255,255,255,.96);
+  border-top: 1px solid rgba(0,0,0,.07);
+  display: grid;
+  grid-template-columns: repeat(5,1fr);
+  padding: 8px 4px calc(8px + env(safe-area-inset-bottom));
+  z-index: 50;
+}
+
+.bottom-nav button {
+  border: 0;
+  background: transparent;
+  font-size: 9px;
+  color: #59605a;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+
+.bottom-nav span {
+  font-size: 18px;
+}
+
+.nav-checkin {
+  color: #172018 !important;
+  font-weight: 800;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-bottom: 24px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 29px;
+  letter-spacing: -1px;
+}
+
+.page-header p {
+  margin: 3px 0 0;
+  font-size: 12px;
+  opacity: .5;
+}
+
+.back-button {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 13px;
+  background: white;
+  font-size: 27px;
+}
+
+.primary-button,
+.secondary-button {
+  border: 0;
+  border-radius: 14px;
+  min-height: 48px;
+  padding: 0 17px;
+  font-weight: 700;
+}
+
+.primary-button {
+  background: #1e2b20;
+  color: white;
+}
+
+.primary-button:disabled {
+  opacity: .35;
+}
+
+.secondary-button {
+  background: white;
+  color: #172018;
+  border: 1px solid rgba(0,0,0,.08);
+}
+
+.full {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.text-button {
+  border: 0;
+  background: transparent;
+  width: 100%;
+  padding: 12px;
+  opacity: .6;
+}
+
+label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  margin: 20px 0 8px;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid rgba(0,0,0,.1);
+  background: white;
+  border-radius: 13px;
+  min-height: 48px;
+  padding: 12px 13px;
+  outline: none;
+}
+
+textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.form-section {
+  background: white;
+  border-radius: 22px;
+  padding: 20px;
+}
+
+.progress {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 5px;
+  margin-bottom: 18px;
+}
+
+.progress div {
+  height: 4px;
+  border-radius: 10px;
+  background: #dfe2dc;
+}
+
+.progress .active {
+  background: #1e2b20;
+}
+
+.number-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f4f5f1;
+  border-radius: 15px;
+  padding: 7px;
+}
+
+.number-control button {
+  border: 0;
+  background: white;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  font-size: 21px;
+}
+
+.number-control strong {
+  font-size: 20px;
+}
+
+.choice-grid {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 8px;
+}
+
+.choice {
+  border: 1px solid rgba(0,0,0,.08);
+  background: #fafbf8;
+  border-radius: 14px;
+  padding: 14px 7px;
+  text-align: center;
+}
+
+.choice strong,
+.choice span {
+  display: block;
+}
+
+.choice strong {
+  font-size: 13px;
+}
+
+.choice span {
+  font-size: 9px;
+  opacity: .5;
+  margin-top: 5px;
+}
+
+.choice.selected {
+  background: #1e2b20;
+  color: white;
+  border-color: #1e2b20;
+}
+
+.stacked-choices {
+  display: grid;
+  gap: 8px;
+}
+
+.choice-row {
+  min-height: 52px;
+  border: 1px solid rgba(0,0,0,.08);
+  background: #fafbf8;
+  border-radius: 14px;
+  padding: 0 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.choice-row.selected {
+  background: #1e2b20;
+  color: white;
+}
+
+.price-box,
+.included-box {
+  background: #f0f2ed;
+  border-radius: 16px;
+  padding: 15px;
+  margin: 18px 0;
+}
+
+.price-box span,
+.price-box strong,
+.included-box strong,
+.included-box span {
+  display: block;
+}
+
+.price-box span,
+.included-box span {
+  font-size: 12px;
+  opacity: .55;
+}
+
+.price-box strong {
+  font-size: 20px;
+  margin-top: 4px;
+}
+
+.room-list {
+  display: grid;
+  gap: 9px;
+}
+
+.room-select {
+  border: 1px solid rgba(0,0,0,.08);
+  background: #fafbf8;
+  border-radius: 15px;
+  padding: 14px;
+  display: flex;
+  justify-content: space-between;
+  text-align: left;
+}
+
+.room-select div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.room-select strong {
+  font-size: 17px;
+}
+
+.room-select span,
+.room-select small {
+  font-size: 11px;
+  opacity: .55;
+}
+
+.room-select.selected {
+  background: #1e2b20;
+  color: white;
+}
+
+.previous-customer {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: #edf2e9;
+  border-radius: 17px;
+  padding: 14px;
+  margin: 12px 0;
+}
+
+.previous-customer p {
+  margin: 3px 0 0;
+  font-size: 12px;
+  opacity: .55;
+}
+
+.celebration {
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1e2b20;
+  color: white;
+}
+
+.booking-summary {
+  background: #f3f4f0;
+  border-radius: 17px;
+  overflow: hidden;
+}
+
+.booking-summary > div {
+  padding: 12px 14px;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(0,0,0,.05);
+}
+
+.booking-summary span {
+  opacity: .5;
+  font-size: 12px;
+}
+
+.booking-summary strong {
+  font-size: 12px;
+}
+
+.booking-summary .summary-total {
+  padding: 16px 14px;
+  background: #e8ebe4;
+}
+
+.booking-summary .summary-total strong {
+  font-size: 17px;
+}
+
+.success-screen {
+  text-align: center;
+  padding: 40px 15px;
+}
+
+.success-icon {
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  background: #1e2b20;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 35px;
+  margin: 0 auto 25px;
+}
+
+.success-screen h1 {
+  font-size: 29px;
+  letter-spacing: -1px;
+}
+
+.confirmation {
+  background: white;
+  border-radius: 19px;
+  padding: 17px;
+  display: grid;
+  gap: 5px;
+  margin: 25px 0;
+}
+
+.confirmation span {
+  font-size: 12px;
+  opacity: .55;
+}
+
+.filter-scroll {
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  padding-bottom: 13px;
+}
+
+.filter {
+  border: 0;
+  background: white;
+  border-radius: 30px;
+  padding: 9px 14px;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.filter.active {
+  background: #1e2b20;
+  color: white;
+}
+
+.room-map {
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.map-room {
+  min-height: 135px;
+  border: 0;
+  border-radius: 19px;
+  padding: 14px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.map-room strong {
+  font-size: 22px;
+}
+
+.map-room span {
+  font-weight: 700;
+  margin-top: 5px;
+}
+
+.map-room small {
+  opacity: .55;
+  margin-top: 4px;
+}
+
+.map-room em {
+  font-style: normal;
+  font-size: 10px;
+  margin-top: auto;
+}
+
+.map-room.available {
+  background: #e8f0e5;
+}
+
+.map-room.occupied {
+  background: #e9e6dc;
+}
+
+.map-room.cleaning {
+  background: #eee6df;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(16,23,17,.45);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.modal {
+  background: #f5f6f2;
+  width: 100%;
+  max-width: 620px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 25px 25px 0 0;
+  padding: 23px 18px 30px;
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  border: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: white;
+  font-size: 22px;
+}
+
+.status-pill,
+.issue-status {
+  display: inline-block;
+  background: #e6ebe3;
+  border-radius: 20px;
+  padding: 7px 10px;
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 800;
+  margin: 8px 0;
+}
+
+.detail {
+  display: flex;
+  justify-content: space-between;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(0,0,0,.06);
+}
+
+.detail span {
+  font-size: 12px;
+  opacity: .5;
+}
+
+.detail strong {
+  font-size: 12px;
+  text-align: right;
+}
+
+.button-row {
+  display: flex;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.button-row > * {
+  flex: 1;
+}
+
+.cleaning-banner {
+  background: #1e2b20;
+  color: white;
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 15px;
+}
+
+.cleaning-banner strong {
+  font-size: 32px;
+  display: block;
+}
+
+.cleaning-banner span {
+  font-size: 12px;
+  opacity: .6;
+}
+
+.task-list {
+  display: grid;
+  gap: 8px;
+}
+
+.task {
+  border: 0;
+  background: white;
+  border-radius: 17px;
+  padding: 13px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+
+.task-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+  background: #e9eee6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.task > div:nth-child(2) {
+  flex: 1;
+}
+
+.task strong,
+.task span {
+  display: block;
+}
+
+.task span {
+  font-size: 11px;
+  opacity: .5;
+  margin-top: 3px;
+}
+
+.guide-card {
+  background: white;
+  border-radius: 21px;
+  padding: 18px;
+  margin-top: 18px;
+}
+
+.guide-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.guide-header > span {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #eef0eb;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.guide-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(0,0,0,.05);
+}
+
+.guide-row > span {
+  width: 23px;
+  height: 23px;
+  border-radius: 50%;
+  background: #edf0eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+}
+
+.guide-row p {
+  margin: 2px 0;
+  font-size: 12px;
+}
+
+.checklist {
+  margin: 18px 0;
+}
+
+.check-row {
+  width: 100%;
+  border: 0;
+  background: white;
+  padding: 13px;
+  margin-bottom: 7px;
+  border-radius: 15px;
+  display: flex;
+  gap: 10px;
+  text-align: left;
+  align-items: center;
+}
+
+.check-row > span {
+  width: 25px;
+  height: 25px;
+  border: 1px solid rgba(0,0,0,.15);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.check-row.checked > span {
+  background: #1e2b20;
+  color: white;
+}
+
+.check-row p {
+  margin: 0;
+  font-size: 12px;
+}
+
+.issue-list {
+  display: grid;
+  gap: 9px;
+  margin-top: 16px;
+}
+
+.issue-card {
+  background: white;
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.issue-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.issue-top strong,
+.issue-top span {
+  display: block;
+}
+
+.issue-top > div > span {
+  font-size: 11px;
+  opacity: .5;
+  margin-top: 3px;
+}
+
+.issue-card p {
+  font-size: 13px;
+  opacity: .65;
+  line-height: 1.5;
+}
+
+.issue-card small {
+  opacity: .4;
+}
+
+.issue-status.open {
+  background: #eee7df;
+}
+
+.issue-status.in.progress {
+  background: #e9ebe2;
+}
+
+.issue-status.completed {
+  background: #e1eee1;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: 10px;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 19px;
+  padding: 17px;
+}
+
+.stat-card span,
+.stat-card strong {
+  display: block;
+}
+
+.stat-card span {
+  font-size: 11px;
+  opacity: .5;
+}
+
+.stat-card strong {
+  font-size: 24px;
+  margin-top: 7px;
+}
+
+.stat-section {
+  background: white;
+  border-radius: 20px;
+  padding: 18px;
+  margin-top: 12px;
+}
+
+.stat-section h2 {
+  font-size: 18px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(0,0,0,.05);
+}
+
+.stat-row div {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-row span {
+  font-size: 11px;
+  opacity: .5;
+}
+
+.settings-tabs {
+  display: flex;
+  overflow-x: auto;
+  gap: 6px;
+  padding-bottom: 15px;
+}
+
+.setting-tab {
+  border: 0;
+  background: white;
+  border-radius: 30px;
+  padding: 9px 14px;
+  white-space: nowrap;
+  font-size: 11px;
+}
+
+.setting-tab.active {
+  background: #1e2b20;
+  color: white;
+}
+
+.settings-section {
+  background: white;
+  border-radius: 20px;
+  padding: 18px;
+}
+
+.settings-section > h2 {
+  margin-bottom: 4px;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 0;
+  border-bottom: 1px solid rgba(0,0,0,.05);
+}
+
+.setting-row div,
+.staff-setting div:nth-child(2) {
+  display: flex;
+  flex-direction: column;
+}
+
+.setting-row span,
+.staff-setting span {
+  font-size: 11px;
+  opacity: .5;
+  margin-top: 3px;
+}
+
+.small-input {
+  width: 90px;
+  text-align: right;
+}
+
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section-heading p {
+  margin: 0;
+  font-size: 11px;
+  opacity: .5;
+}
+
+.small-add {
+  border: 0;
+  background: #1e2b20;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+  font-size: 22px;
+}
+
+.editable-room {
+  padding: 13px 0;
+  border-bottom: 1px solid rgba(0,0,0,.06);
+}
+
+.room-edit-grid {
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  gap: 7px;
+}
+
+.room-edit-grid select {
+  grid-column: 1 / -1;
+}
+
+.delete-button {
+  margin-top: 7px;
+  border: 0;
+  background: transparent;
+  color: #9b5b4e;
+  font-size: 11px;
+}
+
+.editable-guide {
+  display: flex;
+  gap: 7px;
+  margin: 7px 0;
+}
+
+.editable-guide button {
+  width: 45px;
+  border: 0;
+  border-radius: 13px;
+  background: #f0f1ed;
+}
+
+.add-guide {
+  display: flex;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.add-guide button {
+  border: 0;
+  background: #1e2b20;
+  color: white;
+  border-radius: 13px;
+  padding: 0 14px;
+}
+
+.staff-setting {
+  display: grid;
+  grid-template-columns: 42px 1fr 110px;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(0,0,0,.05);
+}
+
+.avatar {
+  width: 47px;
+  height: 47px;
+  border-radius: 15px;
+  background: #1e2b20;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 800;
+}
+
+.avatar.small {
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+}
+
+.customer-list {
+  margin-top: 14px;
+}
+
+.customer-card {
+  display: flex;
+  gap: 11px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(0,0,0,.05);
+}
+
+.customer-card div:last-child {
+  display: flex;
+  flex-direction: column;
+}
+
+.customer-card span,
+.customer-card small {
+  font-size: 11px;
+  opacity: .5;
+  margin-top: 3px;
+}
+
+.locked,
+.empty {
+  text-align: center;
+  padding: 45px 20px;
+}
+
+.locked > div,
+.empty > div {
+  font-size: 38px;
+  margin-bottom: 10px;
+}
+
+.locked p,
+.empty p {
+  opacity: .5;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.login-screen {
+  min-height: 100vh;
+  padding: 55px 18px 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #f5f6f2;
+}
+
+.login-logo {
+  text-align: center;
+  margin-bottom: 35px;
+}
+
+.login-logo .brand {
+  font-size: 36px;
+}
+
+.login-logo p {
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 10px;
+  opacity: .45;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 500px;
+}
+
+.login-card h1 {
+  font-size: 28px;
+  letter-spacing: -1px;
+  margin-bottom: 4px;
+}
+
+.profile-list {
+  display: grid;
+  gap: 9px;
+  margin: 20px 0 12px;
+}
+
+.profile-card {
+  width: 100%;
+  background: white;
+  border: 0;
+  border-radius: 18px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+
+.profile-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-info span {
+  font-size: 11px;
+  opacity: .5;
+  margin-top: 3px;
+}
+
+.arrow {
+  font-size: 25px;
+  opacity: .35;
+}
+
+.form-card {
+  background: white;
+  border-radius: 19px;
+  padding: 17px;
+  margin-top: 12px;
+}
+
+.form-card h3 {
+  margin-top: 0;
+}
+
+.toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e2b20;
+  color: white;
+  padding: 11px 17px;
+  border-radius: 30px;
+  font-size: 12px;
+  z-index: 200;
+  box-shadow: 0 5px 25px rgba(0,0,0,.18);
+}
+
+@media (min-width: 700px) {
+  .app-shell {
+    box-shadow: 0 0 50px rgba(0,0,0,.08);
+  }
+
+  .content {
+    padding-left: 25px;
+    padding-right: 25px;
+  }
+
+  .modal-backdrop {
+    align-items: center;
+  }
+
+  .modal {
+    border-radius: 25px;
+    max-height: 85vh;
+  }
+}
+`;
+
+if (typeof document !== "undefined") {
+  const style = document.createElement("style");
+  style.innerHTML = styles;
+  document.head.appendChild(style);
+}
+
+export default App;

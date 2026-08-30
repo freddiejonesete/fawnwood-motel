@@ -1,0 +1,3907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#17251b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>fawnwood — Hotel Operations</title>
+
+<style>
+/* =========================================================
+   FAWNWOOD — MOBILE HOTEL PMS
+   ========================================================= */
+
+:root{
+  --forest:#17251b;
+  --forest2:#203326;
+  --forest3:#2c4634;
+  --sage:#748b72;
+  --moss:#9aaa87;
+  --cream:#f4f0e7;
+  --paper:#faf8f2;
+  --ink:#20251f;
+  --muted:#70776f;
+  --line:#deded4;
+  --white:#ffffff;
+  --danger:#a64a43;
+  --warning:#a77a39;
+  --success:#527b59;
+  --shadow:0 10px 30px rgba(23,37,27,.10);
+  --radius:20px;
+}
+
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+  margin:0;
+  padding:0;
+  min-height:100%;
+  background:var(--cream);
+  color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",Inter,Arial,sans-serif;
+}
+
+body{
+  padding-bottom:calc(88px + env(safe-area-inset-bottom));
+}
+
+button,
+input,
+select,
+textarea{
+  font:inherit;
+}
+
+button{
+  border:0;
+  cursor:pointer;
+}
+
+.hidden{
+  display:none!important;
+}
+
+.app{
+  min-height:100vh;
+}
+
+.screen{
+  min-height:100vh;
+  padding:20px 16px 110px;
+}
+
+.page{
+  width:100%;
+  max-width:760px;
+  margin:0 auto;
+}
+
+/* =========================================================
+   TYPOGRAPHY
+   ========================================================= */
+
+.brand{
+  letter-spacing:.28em;
+  text-transform:lowercase;
+  font-weight:800;
+  font-size:14px;
+}
+
+h1,h2,h3,p{
+  margin-top:0;
+}
+
+h1{
+  font-size:32px;
+  line-height:1.05;
+  letter-spacing:-.04em;
+  margin-bottom:8px;
+}
+
+h2{
+  font-size:24px;
+  letter-spacing:-.03em;
+  margin-bottom:8px;
+}
+
+h3{
+  font-size:17px;
+  margin-bottom:6px;
+}
+
+.subtitle{
+  color:var(--muted);
+  line-height:1.5;
+}
+
+.small{
+  font-size:13px;
+  color:var(--muted);
+}
+
+/* =========================================================
+   LOGIN
+   ========================================================= */
+
+.login-screen{
+  min-height:100vh;
+  background:
+    linear-gradient(rgba(23,37,27,.78),rgba(23,37,27,.94)),
+    radial-gradient(circle at top right,#536b52,transparent 40%);
+  color:white;
+  padding:30px 18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.login-box{
+  width:100%;
+  max-width:480px;
+}
+
+.login-brand{
+  margin-bottom:48px;
+}
+
+.login-brand .brand{
+  font-size:18px;
+  letter-spacing:.34em;
+}
+
+.login-title{
+  font-size:42px;
+  line-height:.95;
+  letter-spacing:-.06em;
+  margin-bottom:14px;
+}
+
+.profile-list{
+  display:grid;
+  gap:12px;
+  margin-top:28px;
+}
+
+.profile{
+  width:100%;
+  text-align:left;
+  padding:20px;
+  border-radius:22px;
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.16);
+  color:white;
+  display:flex;
+  align-items:center;
+  gap:15px;
+  transition:.18s;
+}
+
+.profile:active{
+  transform:scale(.98);
+  background:rgba(255,255,255,.16);
+}
+
+.avatar{
+  width:52px;
+  height:52px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#d8dfcf;
+  color:var(--forest);
+  font-weight:800;
+  font-size:19px;
+  flex:none;
+}
+
+.profile-info{
+  flex:1;
+}
+
+.profile-name{
+  font-weight:750;
+  font-size:17px;
+}
+
+.profile-user{
+  opacity:.65;
+  font-size:13px;
+  margin-top:3px;
+}
+
+.profile-arrow{
+  opacity:.5;
+  font-size:22px;
+}
+
+/* =========================================================
+   TOP BAR
+   ========================================================= */
+
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:24px;
+}
+
+.topbar-left{
+  min-width:0;
+}
+
+.topbar-title{
+  font-size:24px;
+  font-weight:800;
+  letter-spacing:-.04em;
+}
+
+.topbar-user{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:2px;
+}
+
+.icon-button{
+  width:44px;
+  height:44px;
+  border-radius:15px;
+  background:var(--white);
+  color:var(--forest);
+  box-shadow:0 4px 16px rgba(0,0,0,.06);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:none;
+}
+
+.icon-button svg{
+  width:20px;
+  height:20px;
+}
+
+/* =========================================================
+   CARDS
+   ========================================================= */
+
+.card{
+  background:var(--white);
+  border:1px solid rgba(0,0,0,.04);
+  border-radius:var(--radius);
+  padding:18px;
+  box-shadow:var(--shadow);
+  margin-bottom:14px;
+}
+
+.card-flat{
+  background:rgba(255,255,255,.58);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:16px;
+  margin-bottom:12px;
+}
+
+.hero{
+  background:var(--forest);
+  color:white;
+  padding:22px;
+  border-radius:24px;
+  box-shadow:var(--shadow);
+  margin-bottom:16px;
+}
+
+.hero .small{
+  color:rgba(255,255,255,.62);
+}
+
+.hero h1{
+  margin-bottom:10px;
+}
+
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
+
+.greeting{
+  margin-bottom:20px;
+}
+
+.feature-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+
+.feature{
+  min-height:150px;
+  padding:18px;
+  border-radius:22px;
+  background:white;
+  box-shadow:var(--shadow);
+  text-align:left;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  color:var(--ink);
+}
+
+.feature:active{
+  transform:scale(.985);
+}
+
+.feature-icon{
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  background:#edf0e9;
+  color:var(--forest);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.feature-icon svg{
+  width:22px;
+  height:22px;
+}
+
+.feature-name{
+  font-size:16px;
+  font-weight:750;
+}
+
+.feature-description{
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.35;
+  margin-top:3px;
+}
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.primary{
+  background:var(--forest);
+  color:white;
+  padding:14px 18px;
+  border-radius:15px;
+  font-weight:700;
+  width:100%;
+}
+
+.primary:active{
+  transform:scale(.985);
+}
+
+.secondary{
+  background:#edf0e9;
+  color:var(--forest);
+  padding:13px 16px;
+  border-radius:14px;
+  font-weight:700;
+}
+
+.danger{
+  background:#f7e8e6;
+  color:var(--danger);
+  padding:13px 16px;
+  border-radius:14px;
+  font-weight:700;
+}
+
+.button-row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.button-row>*{
+  flex:1;
+  min-width:130px;
+}
+
+/* =========================================================
+   FORMS
+   ========================================================= */
+
+.field{
+  margin-bottom:15px;
+}
+
+.field label{
+  display:block;
+  font-size:12px;
+  font-weight:750;
+  color:var(--muted);
+  margin-bottom:7px;
+}
+
+.field input,
+.field select,
+.field textarea{
+  width:100%;
+  border:1px solid var(--line);
+  background:#fbfaf6;
+  border-radius:14px;
+  padding:14px;
+  outline:none;
+  color:var(--ink);
+}
+
+.field textarea{
+  min-height:100px;
+  resize:vertical;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus{
+  border-color:var(--sage);
+  box-shadow:0 0 0 3px rgba(116,139,114,.12);
+}
+
+/* =========================================================
+   CHECK-IN CONVERSATION
+   ========================================================= */
+
+.chat{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  margin-bottom:16px;
+}
+
+.chat-bubble{
+  max-width:88%;
+  padding:14px 16px;
+  border-radius:18px;
+  line-height:1.45;
+  font-size:15px;
+}
+
+.chat-bubble.system{
+  align-self:flex-start;
+  background:white;
+  border:1px solid var(--line);
+  border-bottom-left-radius:6px;
+}
+
+.chat-bubble.user{
+  align-self:flex-end;
+  background:var(--forest);
+  color:white;
+  border-bottom-right-radius:6px;
+}
+
+.choice-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+
+.choice{
+  background:white;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:15px 12px;
+  text-align:left;
+  color:var(--ink);
+  min-height:66px;
+}
+
+.choice:active{
+  transform:scale(.98);
+  border-color:var(--sage);
+}
+
+.choice-title{
+  font-weight:750;
+}
+
+.choice-sub{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:3px;
+}
+
+/* =========================================================
+   ROOM MAP
+   ========================================================= */
+
+.room-map{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+
+.room{
+  padding:15px;
+  border-radius:18px;
+  background:white;
+  border:1px solid var(--line);
+  text-align:left;
+  min-height:116px;
+}
+
+.room.available{
+  border-left:5px solid var(--success);
+}
+
+.room.occupied{
+  border-left:5px solid var(--forest);
+}
+
+.room.dirty{
+  border-left:5px solid var(--warning);
+}
+
+.room.maintenance{
+  border-left:5px solid var(--danger);
+}
+
+.room-number{
+  font-size:20px;
+  font-weight:850;
+}
+
+.room-name{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:2px;
+}
+
+.room-type{
+  margin-top:12px;
+  font-size:12px;
+  font-weight:700;
+}
+
+.room-status{
+  margin-top:5px;
+  font-size:11px;
+  color:var(--muted);
+}
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  padding:6px 9px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:750;
+}
+
+.badge.green{
+  background:#e7f0e8;
+  color:#426849;
+}
+
+.badge.yellow{
+  background:#f5eedf;
+  color:#86652e;
+}
+
+.badge.red{
+  background:#f6e5e3;
+  color:#98473f;
+}
+
+.badge.dark{
+  background:#e6ebe5;
+  color:var(--forest);
+}
+
+/* =========================================================
+   DETAILS
+   ========================================================= */
+
+.detail-row{
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+  padding:11px 0;
+  border-bottom:1px solid var(--line);
+}
+
+.detail-row:last-child{
+  border-bottom:0;
+}
+
+.detail-label{
+  color:var(--muted);
+  font-size:13px;
+}
+
+.detail-value{
+  font-weight:700;
+  text-align:right;
+  font-size:13px;
+}
+
+/* =========================================================
+   STATS
+   ========================================================= */
+
+.stat-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+
+.stat{
+  background:white;
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:16px;
+}
+
+.stat-value{
+  font-size:26px;
+  font-weight:850;
+  letter-spacing:-.04em;
+}
+
+.stat-label{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:4px;
+}
+
+/* =========================================================
+   CHECKLIST
+   ========================================================= */
+
+.check-item{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  padding:14px 0;
+  border-bottom:1px solid var(--line);
+}
+
+.check-item:last-child{
+  border-bottom:0;
+}
+
+.check{
+  width:23px;
+  height:23px;
+  border:2px solid #c9cec6;
+  border-radius:7px;
+  flex:none;
+  background:white;
+}
+
+.check.done{
+  background:var(--forest);
+  border-color:var(--forest);
+  position:relative;
+}
+
+.check.done:after{
+  content:"✓";
+  color:white;
+  position:absolute;
+  font-size:14px;
+  font-weight:900;
+  left:4px;
+  top:-1px;
+}
+
+.check-text{
+  flex:1;
+}
+
+.check-title{
+  font-weight:700;
+}
+
+.check-description{
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.4;
+  margin-top:3px;
+}
+
+/* =========================================================
+   BOTTOM NAV
+   ========================================================= */
+
+.bottom-nav{
+  position:fixed;
+  z-index:100;
+  left:0;
+  right:0;
+  bottom:0;
+  padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+  background:rgba(250,248,242,.94);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  border-top:1px solid rgba(0,0,0,.08);
+}
+
+.nav-inner{
+  max-width:760px;
+  margin:auto;
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:3px;
+}
+
+.nav-item{
+  background:transparent;
+  color:#7a8079;
+  border-radius:14px;
+  padding:7px 2px;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+}
+
+.nav-item.active{
+  color:var(--forest);
+  background:#e8ece5;
+}
+
+.nav-item svg{
+  width:20px;
+  height:20px;
+}
+
+.nav-label{
+  font-size:10px;
+  font-weight:700;
+}
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+
+.modal-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:200;
+  background:rgba(15,22,17,.55);
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+}
+
+.modal{
+  width:100%;
+  max-width:760px;
+  max-height:90vh;
+  overflow:auto;
+  background:var(--paper);
+  border-radius:28px 28px 0 0;
+  padding:20px 17px calc(25px + env(safe-area-inset-bottom));
+  animation:slideUp .2s ease;
+}
+
+@keyframes slideUp{
+  from{transform:translateY(30px);opacity:.5}
+  to{transform:translateY(0);opacity:1}
+}
+
+.modal-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:18px;
+}
+
+.modal-close{
+  width:40px;
+  height:40px;
+  border-radius:13px;
+  background:#e9ebe6;
+  color:var(--forest);
+}
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+
+.toast{
+  position:fixed;
+  z-index:500;
+  left:16px;
+  right:16px;
+  bottom:calc(90px + env(safe-area-inset-bottom));
+  max-width:500px;
+  margin:auto;
+  background:var(--forest);
+  color:white;
+  border-radius:15px;
+  padding:14px 16px;
+  box-shadow:var(--shadow);
+  font-size:13px;
+  font-weight:650;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media(min-width:650px){
+  .screen{
+    padding-left:24px;
+    padding-right:24px;
+  }
+
+  .feature-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+
+  .room-map{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+}
+
+@media(max-width:360px){
+  .feature-grid{
+    gap:8px;
+  }
+
+  .feature{
+    padding:14px;
+  }
+
+  .nav-label{
+    font-size:9px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div id="app"></div>
+
+<script>
+/* =========================================================
+   FAWNWOOD HOTEL PMS
+   ========================================================= */
+
+/* ---------------- SUPABASE ---------------- */
+
+const SUPABASE_URL = "https://flusfabvilrygloxwnef.supabase.co";
+const SUPABASE_KEY = "sb_publishable_OliUYp5BG0wZdRGAsPv_2g_kAicECMx";
+
+/*
+  Lightweight Supabase REST client.
+  No external libraries required.
+*/
+
+async function db(table, options = {}) {
+  const {
+    method = "GET",
+    query = "",
+    body = null,
+    headers = {}
+  } = options;
+
+  const response = await fetch(
+    SUPABASE_URL + "/rest/v1/" + table + query,
+    {
+      method,
+      headers:{
+        "apikey":SUPABASE_KEY,
+        "Authorization":"Bearer " + SUPABASE_KEY,
+        "Content-Type":"application/json",
+        "Prefer": method === "GET"
+          ? "return=representation"
+          : "return=representation",
+        ...headers
+      },
+      body: body ? JSON.stringify(body) : undefined
+    }
+  );
+
+  if(!response.ok){
+    const text = await response.text();
+    throw new Error(text || "Database request failed");
+  }
+
+  const text = await response.text();
+  return text ? JSON.parse(text) : [];
+}
+
+/* ---------------- STATE ---------------- */
+
+const state = {
+  staff:null,
+  page:"home",
+  rooms:[],
+  guests:[],
+  reservations:[],
+  housekeeping:[],
+  maintenance:[],
+  roomService:[],
+  settings:null,
+  guide:[],
+  questions:[],
+  loading:false,
+  checkin:{
+    step:"start",
+    guest:{},
+    nights:1,
+    roomType:null,
+    board:null,
+    room:null,
+    rate:0,
+    total:0,
+    credit:100
+  }
+};
+
+/* ---------------- ICONS ---------------- */
+
+const icons = {
+
+home:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+<path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V21h13V9.5"/><path d="M9.5 21v-7h5v7"/>
+</svg>`,
+
+login:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+<path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/>
+<path d="M4 21a8 8 0 0 1 16 0"/>
+</svg>`,
+
+checkin:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+<path d="M7 3h10v18H7z"/><path d="M10 12h8"/><path d="m15 9 3 3-3 3"/>
+</svg>`,
+
+rooms:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+<path d="M4 20V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14"/>
+<path d="M4 15h16M8 11h3M8 8h3"/>
+</svg>`,
+
+amenities:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+<path d="M12 3c4 5 7 8 7 12a7 7 0 0 1-14 0c0-4 3-7 7-12Z"/>
+</svg>`,
+
+settings:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+<path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z"/>
+<path d="m19.4 15 .1.1a2 2 0 0 1-2.8 2.8l-.1-.1a2 2 0 0 0-3.4 1.4v.2a2 2 0 0 1-4 0v-.2a2 2 0 0 0-3.4-1.4l-.1.1A2 2 0 1 1 3 15l.1-.1A2 2 0 0 0 1.7 11.5h-.2a2 2 0 0 1 0-4h.2A2 2 0 0 0 3 4.1L2.9 4A2 2 0 1 1 5.7 1.2l.1.1A2 2 0 0 0 9.2 0h.2a2 2 0 0 1 4 0v.2a2 2 0 0 0 3.4 1.4l.1-.1A2 2 0 1 1 19.7 4l-.1.1a2 2 0 0 0 1.4 3.4h.2a2 2 0 0 1 0 4H21a2 2 0 0 0-1.4 3.5Z"/>
+</svg>`,
+
+clean:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+<path d="m4 20 9-9"/><path d="m13 5 6 6"/><path d="m15 3 6 6"/>
+<path d="M3 21h7"/>
+</svg>`,
+
+tools:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+<path d="m14 6 4-4 4 4-4 4"/><path d="m18 6-8.5 8.5"/>
+<path d="M6 18 3 21"/><path d="M5 14a4 4 0 0 0 5 5"/>
+</svg>`,
+
+service:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+<path d="M4 7h16M6 4h12v17H6z"/><path d="M9 11h6M9 15h6"/>
+</svg>`,
+
+stats:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>
+</svg>`,
+
+logout:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+<path d="M10 4H5v16h5M15 8l4 4-4 4M9 12h10"/>
+</svg>`,
+
+arrow:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+<path d="m9 18 6-6-6-6"/>
+</svg>`,
+
+close:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+<path d="m6 6 12 12M18 6 6 18"/>
+</svg>`
+};
+
+/* ---------------- HELPERS ---------------- */
+
+function esc(value){
+  return String(value ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+function money(value){
+  return "£" + Number(value || 0).toFixed(2);
+}
+
+function toast(message){
+  const old = document.querySelector(".toast");
+  if(old) old.remove();
+
+  const el = document.createElement("div");
+  el.className = "toast";
+  el.textContent = message;
+  document.body.appendChild(el);
+
+  setTimeout(()=>el.remove(),2800);
+}
+
+function initials(name){
+  return (name || "?")
+    .split(" ")
+    .map(x=>x[0])
+    .join("")
+    .slice(0,2)
+    .toUpperCase();
+}
+
+function statusBadge(status){
+  const s = String(status || "").toLowerCase();
+
+  if(["available","clean","completed","paid","resolved"].includes(s)){
+    return `<span class="badge green">${esc(status)}</span>`;
+  }
+
+  if(["dirty","pending","new","normal"].includes(s)){
+    return `<span class="badge yellow">${esc(status)}</span>`;
+  }
+
+  if(["maintenance","open","occupied","unpaid","high"].includes(s)){
+    return `<span class="badge red">${esc(status)}</span>`;
+  }
+
+  return `<span class="badge dark">${esc(status)}</span>`;
+}
+
+/* ---------------- LOGIN ---------------- */
+
+async function loadStaff(){
+  try{
+    return await db("staff",{
+      query:"?active=eq.true&select=*"
+    });
+  }catch(error){
+    console.error(error);
+    return [
+      {
+        id:null,
+        name:"Freddie",
+        username:"freddoxcoastal",
+        roles:["Manager"]
+      },
+      {
+        id:null,
+        name:"Fawn",
+        username:"Froggomushylove",
+        roles:["Manager"]
+      }
+    ];
+  }
+}
+
+async function login(profile){
+  state.staff = profile;
+  localStorage.setItem("fawnwood_staff",JSON.stringify(profile));
+
+  await logActivity(
+    "Staff login",
+    profile.name + " logged into Fawnwood"
+  );
+
+  await refreshData();
+  render();
+}
+
+function showLogin(){
+  const profiles = [
+    {
+      id:null,
+      name:"Freddie",
+      username:"freddoxcoastal",
+      roles:["Manager"]
+    },
+    {
+      id:null,
+      name:"Fawn",
+      username:"Froggomushylove",
+      roles:["Manager"]
+    }
+  ];
+
+  document.getElementById("app").innerHTML = `
+    <main class="login-screen">
+      <div class="login-box">
+
+        <div class="login-brand">
+          <div class="brand">fawnwood</div>
+        </div>
+
+        <div class="small" style="color:rgba(255,255,255,.55)">
+          HOTEL OPERATIONS
+        </div>
+
+        <div class="login-title">
+          Who's<br>working today?
+        </div>
+
+        <p style="color:rgba(255,255,255,.65);line-height:1.5">
+          Select your staff profile to enter the hotel system.
+        </p>
+
+        <div class="profile-list">
+          ${profiles.map(p=>`
+            <button class="profile"
+              onclick='login(${JSON.stringify(p).replaceAll("'","&#39;")})'>
+
+              <div class="avatar">${initials(p.name)}</div>
+
+              <div class="profile-info">
+                <div class="profile-name">${esc(p.name)}</div>
+                <div class="profile-user">@${esc(p.username)}</div>
+              </div>
+
+              <div class="profile-arrow">›</div>
+
+            </button>
+          `).join("")}
+        </div>
+
+      </div>
+    </main>
+  `;
+}
+
+/* ---------------- DATA ---------------- */
+
+async function refreshData(){
+  state.loading = true;
+
+  try{
+    const [
+      rooms,
+      guests,
+      reservations,
+      housekeeping,
+      maintenance,
+      roomService,
+      settings,
+      guide,
+      questions
+    ] = await Promise.all([
+      db("rooms",{query:"?select=*&order=room_number.asc"}),
+      db("guests",{query:"?select=*&order=created_at.desc"}),
+      db("reservations",{query:"?select=*&order=created_at.desc"}),
+      db("housekeeping_tasks",{query:"?select=*&order=created_at.desc"}),
+      db("maintenance_requests",{query:"?select=*&order=created_at.desc"}),
+      db("room_service_orders",{query:"?select=*&order=created_at.desc"}),
+      db("hotel_settings",{query:"?select=*&limit=1"}),
+      db("cleaning_guide",{query:"?active=eq.true&select=*&order=sort_order.asc"}),
+      db("checkin_questions",{query:"?active=eq.true&select=*&order=sort_order.asc"})
+    ]);
+
+    state.rooms = rooms || [];
+    state.guests = guests || [];
+    state.reservations = reservations || [];
+    state.housekeeping = housekeeping || [];
+    state.maintenance = maintenance || [];
+    state.roomService = roomService || [];
+    state.settings = settings?.[0] || {
+      hotel_name:"fawnwood",
+      room_service_free_amount:100
+    };
+    state.guide = guide || [];
+    state.questions = questions || [];
+
+  }catch(error){
+    console.error("Data loading error:",error);
+    toast("Some hotel data could not be loaded.");
+  }
+
+  state.loading = false;
+}
+
+async function logActivity(action,details){
+  try{
+    await db("staff_activity",{
+      method:"POST",
+      body:{
+        staff_id:state.staff?.id || null,
+        action,
+        details
+      }
+    });
+  }catch(error){
+    console.warn("Activity logging failed",error);
+  }
+}
+
+/* ---------------- APP SHELL ---------------- */
+
+function render(){
+  if(!state.staff){
+    showLogin();
+    return;
+  }
+
+  document.getElementById("app").innerHTML = `
+    <div class="app">
+      <main class="screen">
+        <div class="page" id="page"></div>
+      </main>
+
+      ${bottomNav()}
+      <div id="modal-root"></div>
+    </div>
+  `;
+
+  renderPage();
+}
+
+function bottomNav(){
+  const items = [
+    ["home","Home",icons.home],
+    ["checkin","Check-in",icons.checkin],
+    ["rooms","Rooms",icons.rooms],
+    ["amenities","Amenities",icons.amenities]
+  ];
+
+  return `
+    <nav class="bottom-nav">
+      <div class="nav-inner">
+
+        ${items.map(([id,label,icon])=>`
+          <button
+            class="nav-item ${state.page===id?"active":""}"
+            onclick="navigate('${id}')">
+            ${icon}
+            <span class="nav-label">${label}</span>
+          </button>
+        `).join("")}
+
+        <button
+          class="nav-item ${state.page==="settings"?"active":""}"
+          onclick="navigate('settings')">
+          ${icons.settings}
+          <span class="nav-label">More</span>
+        </button>
+
+      </div>
+    </nav>
+  `;
+}
+
+function navigate(page){
+  state.page = page;
+  render();
+}
+
+/* ---------------- HEADER ---------------- */
+
+function header(title,subtitle=""){
+  return `
+    <div class="topbar">
+
+      <div class="topbar-left">
+        <div class="topbar-title">${esc(title)}</div>
+        ${subtitle
+          ? `<div class="topbar-user">${esc(subtitle)}</div>`
+          : ""
+        }
+      </div>
+
+      <button class="icon-button" onclick="navigate('settings')">
+        ${icons.settings}
+      </button>
+
+    </div>
+  `;
+}
+
+/* ---------------- HOME ---------------- */
+
+function renderHome(){
+  const occupied = state.rooms.filter(r=>r.status==="occupied").length;
+  const available = state.rooms.filter(r=>r.status==="available").length;
+  const dirty = state.rooms.filter(r=>r.housekeeping_status!=="clean").length;
+
+  return `
+    ${header(
+      "Good day, " + state.staff.name,
+      "Fawnwood hotel operations"
+    )}
+
+    <section class="hero">
+      <div class="small">TODAY AT FAWNWOOD</div>
+      <h1>Everything<br>in one place.</h1>
+      <p style="color:rgba(255,255,255,.68);line-height:1.5;margin-bottom:0">
+        Manage arrivals, rooms and hotel operations from your phone.
+      </p>
+    </section>
+
+    <div class="stat-grid" style="margin-bottom:16px">
+
+      <div class="stat">
+        <div class="stat-value">${available}</div>
+        <div class="stat-label">Available rooms</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-value">${occupied}</div>
+        <div class="stat-label">Occupied rooms</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-value">${dirty}</div>
+        <div class="stat-label">Need attention</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-value">${state.maintenance.filter(x=>x.status==="Open").length}</div>
+        <div class="stat-label">Open issues</div>
+      </div>
+
+    </div>
+
+    <div class="greeting">
+      <h2>What do you need?</h2>
+      <p class="subtitle">
+        Choose a hotel function.
+      </p>
+    </div>
+
+    <div class="feature-grid">
+
+      ${feature(
+        "checkin",
+        icons.checkin,
+        "Check-in",
+        "Process a new arrival"
+      )}
+
+      ${feature(
+        "rooms",
+        icons.rooms,
+        "Rooms",
+        "View the live room map"
+      )}
+
+      ${feature(
+        "amenities",
+        icons.amenities,
+        "Amenities",
+        "Housekeeping, maintenance & service"
+      )}
+
+      ${feature(
+        "stats",
+        icons.stats,
+        "Statistics",
+        "Hotel performance"
+      )}
+
+      ${feature(
+        "settings",
+        icons.settings,
+        "Settings",
+        "Manager controls"
+      )}
+
+    </div>
+  `;
+}
+
+function feature(page,icon,name,description){
+  return `
+    <button class="feature" onclick="navigate('${page}')">
+      <div class="feature-icon">${icon}</div>
+
+      <div>
+        <div class="feature-name">${esc(name)}</div>
+        <div class="feature-description">
+          ${esc(description)}
+        </div>
+      </div>
+    </button>
+  `;
+}
+
+/* ---------------- CHECK-IN ---------------- */
+
+function renderCheckin(){
+  const c = state.checkin;
+
+  if(c.step==="start"){
+    return `
+      ${header("New check-in","Reception")}
+
+      <div class="hero">
+        <div class="small">RECEPTION</div>
+        <h1>Let's check<br>someone in.</h1>
+        <p style="color:rgba(255,255,255,.68)">
+          I'll guide you through the reservation one step at a time.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="chat">
+          <div class="chat-bubble system">
+            Hi ${esc(state.staff.name)}. 👋
+            Who are we checking in today?
+          </div>
+        </div>
+
+        <button class="primary" onclick="startCheckin()">
+          Start check-in
+        </button>
+      </div>
+    `;
+  }
+
+  if(c.step==="guest"){
+    return `
+      ${header("New check-in","Guest details")}
+
+      <div class="chat">
+        <div class="chat-bubble system">
+          Great. Let's start with the guest.
+          What's their name?
+        </div>
+      </div>
+
+      <div class="card">
+
+        <div class="field">
+          <label>TITLE</label>
+          <select id="guest-title">
+            <option value="">Choose title</option>
+            <option>Mr</option>
+            <option>Mrs</option>
+            <option>Ms</option>
+            <option>Miss</option>
+            <option>Dr</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>FIRST NAME</label>
+          <input id="guest-first" placeholder="First name">
+        </div>
+
+        <div class="field">
+          <label>LAST NAME</label>
+          <input id="guest-last" placeholder="Last name">
+        </div>
+
+        <div class="field">
+          <label>USERNAME</label>
+          <input id="guest-username" placeholder="@username">
+        </div>
+
+        <button class="primary" onclick="saveGuestStep()">
+          Continue
+        </button>
+
+      </div>
+    `;
+  }
+
+  if(c.step==="nights"){
+    return `
+      ${header("New check-in","Length of stay")}
+
+      ${checkinChat([
+        "Nice to meet you, " + (c.guest.first_name || "guest") + ".",
+        "How many nights will they be staying?"
+      ])}
+
+      <div class="card">
+        <div class="field">
+          <label>NIGHTS</label>
+          <input
+            id="stay-nights"
+            type="number"
+            min="1"
+            max="365"
+            value="${c.nights}"
+          >
+        </div>
+
+        <button class="primary" onclick="saveNights()">
+          Continue
+        </button>
+      </div>
+    `;
+  }
+
+  if(c.step==="roomtype"){
+    const types = ["Standard","Deluxe","Suite","Penthouse"];
+
+    return `
+      ${header("New check-in","Room type")}
+
+      ${checkinChat([
+        `Perfect — ${c.nights} night${c.nights==1?"":"s"}.`,
+        "What room type would you like?"
+      ])}
+
+      <div class="choice-grid">
+        ${types.map(type=>`
+          <button class="choice" onclick="chooseRoomType('${type}')">
+            <div class="choice-title">${type}</div>
+            <div class="choice-sub">
+              ${state.rooms.filter(r=>
+                r.room_type===type &&
+                r.status==="available" &&
+                r.housekeeping_status==="clean"
+              ).length} available
+            </div>
+          </button>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  if(c.step==="board"){
+    return `
+      ${header("New check-in","Board basis")}
+
+      ${checkinChat([
+        `${c.room_type} selected.`,
+        `I've found room ${c.room?.room_number || "a room"} for the stay.`,
+        "Which board basis would you like?"
+      ])}
+
+      <div class="choice-grid">
+
+        ${choiceBoard("Room Only","Accommodation only")}
+        ${choiceBoard("B&B","Breakfast included")}
+        ${choiceBoard("B&B + Evening Meal","Breakfast and evening meal")}
+
+      </div>
+    `;
+  }
+
+  if(c.step==="payment"){
+    return `
+      ${header("New check-in","Payment")}
+
+      ${checkinChat([
+        "Everything is ready.",
+        `The total is ${money(c.total)}.`,
+        "How would you like to record payment?"
+      ])}
+
+      <div class="card">
+
+        <div class="detail-row">
+          <span class="detail-label">Guest</span>
+          <span class="detail-value">
+            ${esc(c.guest.first_name)} ${esc(c.guest.last_name)}
+          </span>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">Room</span>
+          <span class="detail-value">
+            ${esc(c.room.room_number)} · ${esc(c.room.room_type)}
+          </span>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">Stay</span>
+          <span class="detail-value">${c.nights} nights</span>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">Board</span>
+          <span class="detail-value">${esc(c.board)}</span>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">Room service credit</span>
+          <span class="detail-value">100 B$ included</span>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">Total</span>
+          <span class="detail-value">${money(c.total)}</span>
+        </div>
+
+        <br>
+
+        <div class="field">
+          <label>PAYMENT METHOD</label>
+          <select id="payment-method">
+            <option>Cash</option>
+            <option>Card</option>
+            <option>Bank transfer</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <button class="primary" onclick="completeCheckin()">
+          Take payment & check in
+        </button>
+
+      </div>
+    `;
+  }
+
+  if(c.step==="complete"){
+    return `
+      ${header("Check-in complete","Reception")}
+
+      <section class="hero">
+        <div class="small">WELCOME TO FAWNWOOD</div>
+        <h1>You're all<br>checked in.</h1>
+        <p style="color:rgba(255,255,255,.68)">
+          The room is now occupied and ready for the guest.
+        </p>
+      </section>
+
+      <div class="card">
+
+        <div class="detail-row">
+          <span class="detail-label">Guest</span>
+          <span class="detail-value">
+            ${esc(c.guest.first_name)} ${esc(c.guest.last_name)}
+          </span>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">Room</span>
+          <span class="detail-value">
+            ${esc(c.room.room_number)}
+            ${c.room.room_name ? " · " + esc(c.room.room_name) : ""}
+          </span>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">Board</span>
+          <span class="detail-value">${esc(c.board)}</span>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">Stay</span>
+          <span class="detail-value">${c.nights} nights</span>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">Paid</span>
+          <span class="detail-value">${money(c.total)}</span>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">Room service</span>
+          <span class="detail-value">100 B$ free credit</span>
+        </div>
+
+        <br>
+
+        <button class="primary" onclick="newCheckin()">
+          New check-in
+        </button>
+
+      </div>
+    `;
+  }
+}
+
+function checkinChat(messages){
+  return `
+    <div class="chat">
+      ${messages.map(m=>`
+        <div class="chat-bubble system">${esc(m)}</div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function choiceBoard(title,sub){
+  return `
+    <button class="choice" onclick="chooseBoard('${title}')">
+      <div class="choice-title">${esc(title)}</div>
+      <div class="choice-sub">${esc(sub)}</div>
+    </button>
+  `;
+}
+
+function startCheckin(){
+  state.checkin.step="guest";
+  render();
+}
+
+function saveGuestStep(){
+  const title=document.getElementById("guest-title").value;
+  const first=document.getElementById("guest-first").value.trim();
+  const last=document.getElementById("guest-last").value.trim();
+  const username=document.getElementById("guest-username").value.trim();
+
+  if(!first || !last){
+    toast("Please enter the guest's name.");
+    return;
+  }
+
+  state.checkin.guest={
+    title,
+    first_name:first,
+    last_name:last,
+    username
+  };
+
+  const previous = state.guests.find(g=>
+    (
+      g.first_name||""
+    ).toLowerCase()===first.toLowerCase() &&
+    (
+      g.last_name||""
+    ).toLowerCase()===last.toLowerCase()
+  );
+
+  if(previous){
+    toast("Previous customer found ✨");
+  }
+
+  state.checkin.step="nights";
+  render();
+}
+
+function saveNights(){
+  const nights=parseInt(
+    document.getElementById("stay-nights").value,
+    10
+  );
+
+  if(!nights || nights<1){
+    toast("Please enter the number of nights.");
+    return;
+  }
+
+  state.checkin.nights=nights;
+  state.checkin.step="roomtype";
+  render();
+}
+
+function chooseRoomType(type){
+  const room=state.rooms.find(r=>
+    r.room_type===type &&
+    r.status==="available" &&
+    r.housekeeping_status==="clean"
+  );
+
+  if(!room){
+    toast("There are no clean rooms of that type available.");
+    return;
+  }
+
+  state.checkin.roomType=type;
+  state.checkin.room=room;
+
+  state.checkin.step="board";
+  render();
+}
+
+function chooseBoard(board){
+  const c=state.checkin;
+
+  c.board=board;
+
+  const baseRates={
+    "Standard":100,
+    "Deluxe":150,
+    "Suite":225,
+    "Penthouse":350
+  };
+
+  const boardAdd={
+    "Room Only":0,
+    "B&B":20,
+    "B&B + Evening Meal":45
+  };
+
+  c.rate=
+    (baseRates[c.roomType] || 100) +
+    (boardAdd[board] || 0);
+
+  c.total=c.rate*c.nights;
+
+  c.step="payment";
+  render();
+}
+
+async function completeCheckin(){
+  const c=state.checkin;
+
+  try{
+    const guestRows=await db("guests",{
+      method:"POST",
+      body:c.guest
+    });
+
+    const guest=guestRows[0];
+
+    const reservationRows=await db("reservations",{
+      method:"POST",
+      body:{
+        guest_id:guest.id,
+        room_id:c.room.id,
+        nights:c.nights,
+        room_type:c.roomType,
+        board_basis:c.board,
+        nightly_price:c.rate,
+        accommodation_total:c.total,
+        room_service_credit:100,
+        room_service_used:0,
+        room_service_charge:0,
+        total_price:c.total,
+        payment_status:"paid",
+        status:"checked_in",
+        created_by:state.staff?.id || null,
+        checked_in_at:new Date().toISOString()
+      }
+    });
+
+    const reservation=reservationRows[0];
+
+    await db("payments",{
+      method:"POST",
+      body:{
+        reservation_id:reservation.id,
+        guest_id:guest.id,
+        amount:c.total,
+        method:document.getElementById("payment-method").value,
+        status:"paid",
+        created_by:state.staff?.id || null
+      }
+    });
+
+    await db("rooms",{
+      method:"PATCH",
+      query:"?id=eq."+encodeURIComponent(c.room.id),
+      body:{
+        status:"occupied",
+        housekeeping_status:"clean",
+        guest_id:guest.id,
+        reservation_id:reservation.id
+      }
+    });
+
+    await logActivity(
+      "Guest checked in",
+      `${c.guest.first_name} ${c.guest.last_name} checked into room ${c.room.room_number}`
+    );
+
+    await refreshData();
+
+    c.step="complete";
+    render();
+
+  }catch(error){
+    console.error(error);
+    toast("The check-in could not be saved.");
+  }
+}
+
+function newCheckin(){
+  state.checkin={
+    step:"start",
+    guest:{},
+    nights:1,
+    roomType:null,
+    board:null,
+    room:null,
+    rate:0,
+    total:0,
+    credit:100
+  };
+
+  navigate("checkin");
+}
+
+/* ---------------- ROOMS ---------------- */
+
+function renderRooms(){
+  return `
+    ${header(
+      "Rooms",
+      `${state.rooms.length} rooms · live hotel map`
+    )}
+
+    <div class="card-flat">
+      <div style="display:flex;justify-content:space-between;gap:10px">
+        <div>
+          <strong>Live room map</strong>
+          <div class="small">
+            Tap a room for guest details.
+          </div>
+        </div>
+
+        <button class="secondary" onclick="refreshData().then(render)">
+          Refresh
+        </button>
+      </div>
+    </div>
+
+    <div class="room-map">
+      ${state.rooms.map(room=>roomCard(room)).join("")}
+    </div>
+  `;
+}
+
+function roomCard(room){
+  const status=String(room.status||"available").toLowerCase();
+
+  let cls="available";
+
+  if(status==="occupied") cls="occupied";
+  if(room.housekeeping_status!=="clean" && status==="available")
+    cls="dirty";
+  if(status==="maintenance")
+    cls="maintenance";
+
+  return `
+    <button
+      class="room ${cls}"
+      onclick="openRoom('${room.id}')">
+
+      <div class="room-number">${esc(room.room_number)}</div>
+
+      <div class="room-name">
+        ${esc(room.room_name || "Unnamed room")}
+      </div>
+
+      <div class="room-type">
+        ${esc(room.room_type)}
+      </div>
+
+      <div class="room-status">
+        ${esc(room.status)}
+        ${room.housekeeping_status
+          ? " · " + esc(room.housekeeping_status)
+          : ""
+        }
+      </div>
+
+    </button>
+  `;
+}
+
+async function openRoom(id){
+  const room=state.rooms.find(r=>r.id===id);
+
+  if(!room) return;
+
+  let guest=null;
+  let reservation=null;
+
+  if(room.guest_id){
+    guest=state.guests.find(g=>g.id===room.guest_id);
+  }
+
+  if(room.reservation_id){
+    reservation=state.reservations.find(r=>r.id===room.reservation_id);
+  }
+
+  const manager=state.staff?.roles?.includes("Manager");
+
+  showModal(`
+    <div class="modal-head">
+      <div>
+        <h2>Room ${esc(room.room_number)}</h2>
+        <div class="small">
+          ${esc(room.room_name || "Unnamed room")} · ${esc(room.room_type)}
+        </div>
+      </div>
+
+      <button class="modal-close" onclick="closeModal()">
+        ${icons.close}
+      </button>
+    </div>
+
+    <div class="card-flat">
+      <div class="detail-row">
+        <span class="detail-label">Status</span>
+        <span class="detail-value">
+          ${statusBadge(room.status)}
+        </span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Housekeeping</span>
+        <span class="detail-value">
+          ${statusBadge(room.housekeeping_status)}
+        </span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Floor</span>
+        <span class="detail-value">${room.floor}</span>
+      </div>
+    </div>
+
+    ${
+      guest
+      ? `
+        <h3>Current guest</h3>
+
+        <div class="card-flat">
+
+          <div class="detail-row">
+            <span class="detail-label">Name</span>
+            <span class="detail-value">
+              ${esc(guest.title || "")}
+              ${esc(guest.first_name)}
+              ${esc(guest.last_name)}
+            </span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-label">Username</span>
+            <span class="detail-value">
+              ${esc(guest.username || "—")}
+            </span>
+          </div>
+
+          ${
+            reservation
+            ? `
+              <div class="detail-row">
+                <span class="detail-label">Board</span>
+                <span class="detail-value">
+                  ${esc(reservation.board_basis)}
+                </span>
+              </div>
+
+              <div class="detail-row">
+                <span class="detail-label">Nights</span>
+                <span class="detail-value">
+                  ${reservation.nights}
+                </span>
+              </div>
+
+              <div class="detail-row">
+                <span class="detail-label">Room service credit</span>
+                <span class="detail-value">
+                  ${reservation.room_service_credit || 100} B$
+                </span>
+              </div>
+
+              <div class="detail-row">
+                <span class="detail-label">Room service used</span>
+                <span class="detail-value">
+                  ${reservation.room_service_used || 0} B$
+                </span>
+              </div>
+            `
+            : ""
+          }
+
+        </div>
+
+        <button class="primary" onclick="checkout('${room.id}')">
+          Check out guest
+        </button>
+      `
+      : `
+        <div class="card">
+          <h3>Room available</h3>
+          <p class="subtitle">
+            No guest is currently assigned to this room.
+          </p>
+        </div>
+      `
+    }
+
+    ${
+      manager
+      ? `
+        <br>
+
+        <button
+          class="secondary"
+          style="width:100%"
+          onclick="editRoom('${room.id}')">
+          Edit room
+        </button>
+      `
+      : ""
+    }
+  `);
+}
+
+/* ---------------- CHECKOUT ---------------- */
+
+async function checkout(roomId){
+  const room=state.rooms.find(r=>r.id===roomId);
+
+  if(!room || !room.reservation_id){
+    toast("No active reservation found.");
+    return;
+  }
+
+  const reservation=state.reservations.find(
+    r=>r.id===room.reservation_id
+  );
+
+  if(!reservation){
+    toast("Reservation could not be found.");
+    return;
+  }
+
+  if(!confirm("Check this guest out?")){
+    return;
+  }
+
+  try{
+    await db("reservations",{
+      method:"PATCH",
+      query:"?id=eq."+encodeURIComponent(reservation.id),
+      body:{
+        status:"checked_out",
+        checked_out_at:new Date().toISOString()
+      }
+    });
+
+    await db("rooms",{
+      method:"PATCH",
+      query:"?id=eq."+encodeURIComponent(room.id),
+      body:{
+        status:"available",
+        housekeeping_status:"dirty",
+        guest_id:null,
+        reservation_id:null
+      }
+    });
+
+    await db("housekeeping_tasks",{
+      method:"POST",
+      body:{
+        room_id:room.id,
+        reservation_id:reservation.id,
+        status:"pending",
+        checklist:{}
+      }
+    });
+
+    await logActivity(
+      "Guest checked out",
+      `Room ${room.room_number} sent to housekeeping`
+    );
+
+    closeModal();
+    await refreshData();
+    render();
+
+    toast(`Room ${room.room_number} sent to housekeeping.`);
+
+  }catch(error){
+    console.error(error);
+    toast("Checkout could not be completed.");
+  }
+}
+
+/* ---------------- AMENITIES ---------------- */
+
+function renderAmenities(){
+  return `
+    ${header(
+      "Amenities",
+      "Hotel operations"
+    )}
+
+    <div class="feature-grid">
+
+      ${feature(
+        "housekeeping",
+        icons.clean,
+        "Cleaning",
+        "Rooms waiting to be cleaned"
+      )}
+
+      ${feature(
+        "maintenance",
+        icons.tools,
+        "Maintenance",
+        "Report and resolve problems"
+      )}
+
+      ${feature(
+        "roomservice",
+        icons.service,
+        "Room service",
+        "Charge room service to guests"
+      )}
+
+      ${feature(
+        "issues",
+        icons.tools,
+        "Issues",
+        "View hotel issues"
+      )}
+
+    </div>
+  `;
+}
+
+/* ---------------- HOUSEKEEPING ---------------- */
+
+function renderHousekeeping(){
+  const tasks=state.housekeeping.filter(
+    t=>t.status!=="completed"
+  );
+
+  return `
+    ${header(
+      "Cleaning",
+      `${tasks.length} rooms need attention`
+    )}
+
+    <div class="card">
+      <h2>Housekeeping</h2>
+      <p class="subtitle">
+        Rooms automatically appear here after checkout.
+        Once cleaned, they become available again.
+      </p>
+    </div>
+
+    ${
+      tasks.length
+      ? tasks.map(task=>{
+          const room=state.rooms.find(r=>r.id===task.room_id);
+
+          return `
+            <button
+              class="card-flat"
+              style="width:100%;text-align:left"
+              onclick="openCleaning('${task.id}')">
+
+              <div style="display:flex;align-items:center;gap:12px">
+
+                <div class="feature-icon">
+                  ${icons.clean}
+                </div>
+
+                <div style="flex:1">
+                  <strong>
+                    Room ${esc(room?.room_number || "—")}
+                  </strong>
+
+                  <div class="small">
+                    ${esc(room?.room_type || "")}
+                  </div>
+                </div>
+
+                ${statusBadge(task.status)}
+
+              </div>
+
+            </button>
+          `;
+        }).join("")
+      : `
+        <div class="card">
+          <h3>Nothing to clean 🎉</h3>
+          <p class="subtitle">
+            All rooms are currently clean.
+          </p>
+        </div>
+      `
+    }
+
+    <br>
+
+    <div class="card">
+      <h3>Cleaning standard</h3>
+      <p class="subtitle">
+        Managers can edit the hotel cleaning guide in Settings.
+      </p>
+
+      <button
+        class="secondary"
+        onclick="showCleaningGuide()">
+        View cleaning guide
+      </button>
+    </div>
+  `;
+}
+
+function openCleaning(taskId){
+  const task=state.housekeeping.find(t=>t.id===taskId);
+
+  if(!task) return;
+
+  const room=state.rooms.find(r=>r.id===task.room_id);
+
+  const checks=state.guide.length
+    ? state.guide
+    : [
+      {
+        id:"bed",
+        title:"Make the bed",
+        description:"Fresh linen and presentation."
+      },
+      {
+        id:"bathroom",
+        title:"Clean bathroom",
+        description:"Bathroom fully cleaned."
+      },
+      {
+        id:"towels",
+        title:"Replace towels",
+        description:"Replace used towels."
+      },
+      {
+        id:"amenities",
+        title:"Restock amenities",
+        description:"Replace guest supplies."
+      },
+      {
+        id:"surfaces",
+        title:"Clean surfaces",
+        description:"Dust and wipe surfaces."
+      },
+      {
+        id:"floor",
+        title:"Clean floor",
+        description:"Clean the complete floor."
+      },
+      {
+        id:"final",
+        title:"Final inspection",
+        description:"Room ready for next guest."
+      }
+    ];
+
+  const checklist=task.checklist || {};
+
+  showModal(`
+    <div class="modal-head">
+
+      <div>
+        <h2>Room ${esc(room?.room_number || "")}</h2>
+        <div class="small">Cleaning checklist</div>
+      </div>
+
+      <button class="modal-close" onclick="closeModal()">
+        ${icons.close}
+      </button>
+
+    </div>
+
+    <div class="card">
+
+      ${checks.map((item,index)=>{
+
+        const key=item.id || item.title.toLowerCase()
+          .replace(/[^a-z0-9]+/g,"_");
+
+        return `
+          <button
+            class="check-item"
+            style="width:100%;background:none;text-align:left"
+            onclick="toggleCleanItem('${task.id}','${esc(key)}')">
+
+            <span class="check ${checklist[key]?"done":""}"></span>
+
+            <span class="check-text">
+              <div class="check-title">
+                ${esc(item.title)}
+              </div>
+
+              <div class="check-description">
+                ${esc(item.description || "")}
+              </div>
+            </span>
+
+          </button>
+        `;
+      }).join("")}
+
+    </div>
+
+    <button class="primary" onclick="completeCleaning('${task.id}')">
+      Room is clean
+    </button>
+  `);
+}
+
+async function toggleCleanItem(taskId,key){
+  const task=state.housekeeping.find(t=>t.id===taskId);
+
+  if(!task) return;
+
+  const checklist={...(task.checklist||{})};
+  checklist[key]=!checklist[key];
+
+  task.checklist=checklist;
+
+  try{
+    await db("housekeeping_tasks",{
+      method:"PATCH",
+      query:"?id=eq."+encodeURIComponent(taskId),
+      body:{checklist}
+    });
+  }catch(error){
+    console.error(error);
+  }
+
+  openCleaning(taskId);
+}
+
+async function completeCleaning(taskId){
+  const task=state.housekeeping.find(t=>t.id===taskId);
+
+  if(!task) return;
+
+  try{
+    await db("housekeeping_tasks",{
+      method:"PATCH",
+      query:"?id=eq."+encodeURIComponent(taskId),
+      body:{
+        status:"completed",
+        completed_at:new Date().toISOString()
+      }
+    });
+
+    await db("rooms",{
+      method:"PATCH",
+      query:"?id=eq."+encodeURIComponent(task.room_id),
+      body:{
+        status:"available",
+        housekeeping_status:"clean"
+      }
+    });
+
+    await logActivity(
+      "Room cleaned",
+      `Room ${state.rooms.find(r=>r.id===task.room_id)?.room_number || ""} released`
+    );
+
+    closeModal();
+    await refreshData();
+    render();
+
+    toast("Room cleaned and available.");
+
+  }catch(error){
+    console.error(error);
+    toast("Could not complete cleaning.");
+  }
+}
+
+function showCleaningGuide(){
+  showModal(`
+    <div class="modal-head">
+      <div>
+        <h2>Cleaning guide</h2>
+        <div class="small">Fawnwood standard</div>
+      </div>
+
+      <button class="modal-close" onclick="closeModal()">
+        ${icons.close}
+      </button>
+    </div>
+
+    ${
+      state.guide.length
+      ? state.guide.map(item=>`
+          <div class="card-flat">
+            <strong>${esc(item.title)}</strong>
+            <div class="small">
+              ${esc(item.description || "")}
+            </div>
+          </div>
+        `).join("")
+      : `
+        <div class="card">
+          No cleaning guide items yet.
+        </div>
+      `
+    }
+  `);
+}
+
+/* ---------------- MAINTENANCE ---------------- */
+
+function renderMaintenance(){
+  return `
+    ${header(
+      "Maintenance",
+      "Problems & repairs"
+    )}
+
+    <button class="primary" onclick="newMaintenance()">
+      Report an issue
+    </button>
+
+    <br><br>
+
+    ${
+      state.maintenance.length
+      ? state.maintenance.map(item=>`
+          <button
+            class="card-flat"
+            style="width:100%;text-align:left"
+            onclick="openMaintenance('${item.id}')">
+
+            <div style="display:flex;gap:12px">
+
+              <div class="feature-icon">
+                ${icons.tools}
+              </div>
+
+              <div style="flex:1">
+                <strong>${esc(item.title)}</strong>
+
+                <div class="small">
+                  ${esc(item.description || "")}
+                </div>
+
+                <div style="margin-top:7px">
+                  ${statusBadge(item.status)}
+                </div>
+              </div>
+
+            </div>
+
+          </button>
+        `).join("")
+      : `
+        <div class="card">
+          <h3>No maintenance issues</h3>
+          <p class="subtitle">
+            Everything looks good.
+          </p>
+        </div>
+      `
+    }
+  `;
+}
+
+function newMaintenance(){
+  showModal(`
+    <div class="modal-head">
+      <div>
+        <h2>Report issue</h2>
+        <div class="small">Maintenance</div>
+      </div>
+
+      <button class="modal-close" onclick="closeModal()">
+        ${icons.close}
+      </button>
+    </div>
+
+    <div class="field">
+      <label>TITLE</label>
+      <input id="maint-title" placeholder="e.g. Bathroom tap leaking">
+    </div>
+
+    <div class="field">
+      <label>ROOM</label>
+      <select id="maint-room">
+        <option value="">General hotel issue</option>
+        ${state.rooms.map(r=>`
+          <option value="${r.id}">
+            Room ${esc(r.room_number)}
+          </option>
+        `).join("")}
+      </select>
+    </div>
+
+    <div class="field">
+      <label>PRIORITY</label>
+      <select id="maint-priority">
+        <option>Normal</option>
+        <option>High</option>
+        <option>Urgent</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>DESCRIPTION</label>
+      <textarea id="maint-description"></textarea>
+    </div>
+
+    <button class="primary" onclick="saveMaintenance()">
+      Report issue
+    </button>
+  `);
+}
+
+async function saveMaintenance(){
+  const title=document.getElementById("maint-title").value.trim();
+
+  if(!title){
+    toast("Give the issue a title.");
+    return;
+  }
+
+  try{
+    await db("maintenance_requests",{
+      method:"POST",
+      body:{
+        title,
+        room_id:document.getElementById("maint-room").value || null,
+        priority:document.getElementById("maint-priority").value,
+        description:document.getElementById("maint-description").value,
+        status:"Open",
+        reported_by:state.staff.name
+      }
+    });
+
+    closeModal();
+    await refreshData();
+    render();
+
+    toast("Issue reported.");
+
+  }catch(error){
+    console.error(error);
+    toast("Issue could not be saved.");
+  }
+}
+
+function openMaintenance(id){
+  const item=state.maintenance.find(x=>x.id===id);
+
+  if(!item) return;
+
+  const room=state.rooms.find(r=>r.id===item.room_id);
+
+  showModal(`
+    <div class="modal-head">
+      <div>
+        <h2>${esc(item.title)}</h2>
+        <div class="small">
+          ${esc(room ? "Room "+room.room_number : "Hotel-wide")}
+        </div>
+      </div>
+
+      <button class="modal-close" onclick="closeModal()">
+        ${icons.close}
+      </button>
+    </div>
+
+    <div class="card-flat">
+      <div class="detail-row">
+        <span class="detail-label">Status</span>
+        <span class="detail-value">
+          ${statusBadge(item.status)}
+        </span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Priority</span>
+        <span class="detail-value">
+          ${esc(item.priority)}
+        </span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Reported by</span>
+        <span class="detail-value">
+          ${esc(item.reported_by || "—")}
+        </span>
+      </div>
+    </div>
+
+    <div class="card">
+      <strong>Description</strong>
+      <p class="subtitle" style="margin-top:8px">
+        ${esc(item.description || "No description.")}
+      </p>
+    </div>
+
+    ${
+      item.status!=="Resolved"
+      ? `
+        <button class="primary" onclick="resolveMaintenance('${item.id}')">
+          Mark as resolved
+        </button>
+      `
+      : `
+        <div class="card">
+          <strong>Resolved</strong>
+          <p class="subtitle">
+            ${esc(item.resolution_notes || "")}
+          </p>
+        </div>
+      `
+    }
+  `);
+}
+
+async function resolveMaintenance(id){
+  const notes=prompt("How was the issue fixed?");
+
+  if(notes===null) return;
+
+  try{
+    await db("maintenance_requests",{
+      method:"PATCH",
+      query:"?id=eq."+encodeURIComponent(id),
+      body:{
+        status:"Resolved",
+        resolved_by:state.staff.name,
+        resolution_notes:notes,
+        resolved_at:new Date().toISOString()
+      }
+    });
+
+    closeModal();
+    await refreshData();
+    render();
+
+    toast("Issue resolved.");
+
+  }catch(error){
+    console.error(error);
+    toast("Could not resolve issue.");
+  }
+}
+
+/* ---------------- ROOM SERVICE ---------------- */
+
+function renderRoomService(){
+  const occupiedRooms=state.rooms.filter(
+    r=>r.status==="occupied" && r.guest_id
+  );
+
+  return `
+    ${header(
+      "Room service",
+      "Guest charges"
+    )}
+
+    <div class="hero">
+      <div class="small">ROOM SERVICE CREDIT</div>
+      <h1>First 100 B$<br>is included.</h1>
+      <p style="color:rgba(255,255,255,.68)">
+        Guests receive 100 B$ of room service free.
+        Additional room service can be added to their charge.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>Select guest</h3>
+
+      ${
+        occupiedRooms.length
+        ? occupiedRooms.map(room=>{
+            const guest=state.guests.find(g=>g.id===room.guest_id);
+
+            return `
+              <button
+                class="card-flat"
+                style="width:100%;text-align:left"
+                onclick="openRoomService('${room.id}')">
+
+                <strong>
+                  ${esc(guest?.first_name || "")}
+                  ${esc(guest?.last_name || "")}
+                </strong>
+
+                <div class="small">
+                  Room ${esc(room.room_number)}
+                </div>
+
+              </button>
+            `;
+          }).join("")
+        : `
+          <p class="subtitle">
+            There are currently no checked-in guests.
+          </p>
+        `
+      }
+
+    </div>
+  `;
+}
+
+function openRoomService(roomId){
+  const room=state.rooms.find(r=>r.id===roomId);
+
+  if(!room) return;
+
+  const guest=state.guests.find(g=>g.id===room.guest_id);
+  const reservation=state.reservations.find(
+    r=>r.id===room.reservation_id
+  );
+
+  if(!guest || !reservation){
+    toast("Guest reservation not found.");
+    return;
+  }
+
+  const used=Number(reservation.room_service_used||0);
+  const free=Number(reservation.room_service_credit||100);
+  const remaining=Math.max(0,free-used);
+
+  showModal(`
+    <div class="modal-head">
+      <div>
+        <h2>Room service</h2>
+        <div class="small">
+          ${esc(guest.first_name)} ${esc(guest.last_name)}
+          · Room ${esc(room.room_number)}
+        </div>
+      </div>
+
+      <button class="modal-close" onclick="closeModal()">
+        ${icons.close}
+      </button>
+    </div>
+
+    <div class="card">
+
+      <div class="detail-row">
+        <span class="detail-label">Included credit</span>
+        <span class="detail-value">${free} B$</span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Used</span>
+        <span class="detail-value">${used} B$</span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Remaining free</span>
+        <span class="detail-value">${remaining} B$</span>
+      </div>
+
+    </div>
+
+    <div class="field">
+      <label>ROOM SERVICE VALUE (B$)</label>
+      <input
+        id="service-amount"
+        type="number"
+        min="0"
+        step="1"
+        value="0"
+      >
+    </div>
+
+    <div class="field">
+      <label>DESCRIPTION</label>
+      <input
+        id="service-description"
+        placeholder="e.g. Dinner delivery"
+      >
+    </div>
+
+    <div class="card-flat">
+      <div class="small">
+        Amount over the guest's remaining free allowance
+        will be added to the charge.
+      </div>
+    </div>
+
+    <button
+      class="primary"
+      onclick="addRoomService('${room.id}')">
+      Add room service
+    </button>
+  `);
+}
+
+async function addRoomService(roomId){
+  const amount=Number(
+    document.getElementById("service-amount").value
+  );
+
+  if(amount<=0){
+    toast("Enter a room service amount.");
+    return;
+  }
+
+  const description=
+    document.getElementById("service-description").value.trim();
+
+  const room=state.rooms.find(r=>r.id===roomId);
+  const reservation=state.reservations.find(
+    r=>r.id===room.reservation_id
+  );
+
+  const used=Number(reservation.room_service_used||0);
+  const free=Number(reservation.room_service_credit||100);
+
+  const remainingFree=Math.max(0,free-used);
+
+  const included=Math.min(amount,remainingFree);
+  const charge=Math.max(0,amount-included);
+
+  try{
+    await db("room_service_orders",{
+      method:"POST",
+      body:{
+        room_id:room.id,
+        guest_id:room.guest_id,
+        reservation_id:reservation.id,
+        items:[
+          {
+            description,
+            amount
+          }
+        ],
+        subtotal:amount,
+        included_amount:included,
+        chargeable_amount:charge,
+        status:"New",
+        created_by:state.staff?.id || null
+      }
+    });
+
+    await db("reservations",{
+      method:"PATCH",
+      query:"?id=eq."+encodeURIComponent(reservation.id),
+      body:{
+        room_service_used:used+included,
+        room_service_charge:
+          Number(reservation.room_service_charge||0)+charge,
+        total_price:
+          Number(reservation.total_price||0)+charge
+      }
+    });
+
+    closeModal();
+    await refreshData();
+    render();
+
+    if(charge>0){
+      toast(`${included} B$ included · ${charge} B$ added to charge`);
+    }else{
+      toast("Room service added within the free allowance.");
+    }
+
+  }catch(error){
+    console.error(error);
+    toast("Room service could not be saved.");
+  }
+}
+
+/* ---------------- ISSUES ---------------- */
+
+function renderIssues(){
+  const open=state.maintenance.filter(
+    x=>x.status!=="Resolved"
+  );
+
+  return `
+    ${header(
+      "Issues",
+      `${open.length} unresolved`
+    )}
+
+    <div class="card">
+      <h2>Hotel issues</h2>
+      <p class="subtitle">
+        Report, track and resolve anything affecting the hotel.
+      </p>
+
+      <button class="primary" onclick="newMaintenance()">
+        Report an issue
+      </button>
+    </div>
+
+    ${
+      open.map(item=>`
+        <button
+          class="card-flat"
+          style="width:100%;text-align:left"
+          onclick="openMaintenance('${item.id}')">
+
+          <strong>${esc(item.title)}</strong>
+
+          <div class="small">
+            ${esc(item.description || "")}
+          </div>
+
+          <div style="margin-top:7px">
+            ${statusBadge(item.priority)}
+          </div>
+
+        </button>
+      `).join("")
+      ||
+      `
+        <div class="card">
+          <h3>All clear</h3>
+          <p class="subtitle">
+            There are no unresolved issues.
+          </p>
+        </div>
+      `
+    }
+  `;
+}
+
+/* ---------------- STATS ---------------- */
+
+function renderStats(){
+  const paid=state.reservations
+    .filter(r=>r.payment_status==="paid")
+    .reduce((sum,r)=>sum+Number(r.total_price||0),0);
+
+  const checkedIn=state.reservations.filter(
+    r=>r.status==="checked_in"
+  ).length;
+
+  const completed=state.reservations.filter(
+    r=>r.status==="checked_out"
+  ).length;
+
+  const roomsUsed=state.reservations.filter(
+    r=>r.room_id
+  ).length;
+
+  return `
+    ${header(
+      "Statistics",
+      "All-time hotel performance"
+    )}
+
+    <div class="stat-grid">
+
+      <div class="stat">
+        <div class="stat-value">${state.guests.length}</div>
+        <div class="stat-label">Customers</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-value">${state.reservations.length}</div>
+        <div class="stat-label">Reservations</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-value">${money(paid)}</div>
+        <div class="stat-label">Recorded revenue</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-value">${roomsUsed}</div>
+        <div class="stat-label">Room stays</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-value">${checkedIn}</div>
+        <div class="stat-label">Current stays</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-value">${completed}</div>
+        <div class="stat-label">Completed stays</div>
+      </div>
+
+    </div>
+
+    <br>
+
+    <div class="card">
+      <h2>Room usage</h2>
+
+      ${
+        state.rooms.map(room=>{
+          const count=state.reservations.filter(
+            r=>r.room_id===room.id
+          ).length;
+
+          return `
+            <div class="detail-row">
+              <span class="detail-label">
+                Room ${esc(room.room_number)}
+              </span>
+
+              <span class="detail-value">
+                ${count} stay${count===1?"":"s"}
+              </span>
+            </div>
+          `;
+        }).join("")
+      }
+
+    </div>
+
+    <div class="card">
+      <h2>Customers</h2>
+
+      ${
+        state.guests.slice(0,20).map(g=>`
+          <div class="detail-row">
+            <span class="detail-label">
+              ${esc(g.first_name)} ${esc(g.last_name)}
+            </span>
+
+            <span class="detail-value">
+              ${esc(g.username || "—")}
+            </span>
+          </div>
+        `).join("")
+        ||
+        `<p class="subtitle">No customers yet.</p>`
+      }
+
+    </div>
+  `;
+}
+
+/* ---------------- SETTINGS ---------------- */
+
+function renderSettings(){
+  const manager=state.staff?.roles?.includes("Manager");
+
+  return `
+    ${header(
+      "Settings",
+      manager ? "Manager controls" : "Staff settings"
+    )}
+
+    <div class="card">
+      <div style="display:flex;gap:13px;align-items:center">
+        <div class="avatar">
+          ${initials(state.staff.name)}
+        </div>
+
+        <div>
+          <strong>${esc(state.staff.name)}</strong>
+          <div class="small">
+            @${esc(state.staff.username)}
+          </div>
+          <div style="margin-top:5px">
+            ${statusBadge(state.staff.roles?.join(", ") || "Staff")}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    ${
+      manager
+      ? `
+        <h3>Manager controls</h3>
+
+        <div class="feature-grid">
+
+          ${feature(
+            "roomedit",
+            icons.rooms,
+            "Manage rooms",
+            "Add and edit rooms"
+          )}
+
+          ${feature(
+            "guideedit",
+            icons.clean,
+            "Cleaning guide",
+            "Edit cleaning standards"
+          )}
+
+          ${feature(
+            "customerhistory",
+            icons.login,
+            "Customers",
+            "All previous guests"
+          )}
+
+          ${feature(
+            "questions",
+            icons.checkin,
+            "Check-in questions",
+            "Control the reception flow"
+          )}
+
+        </div>
+      `
+      : ""
+    }
+
+    <br>
+
+    <button class="danger" style="width:100%" onclick="logout()">
+      ${icons.logout}
+      &nbsp; Sign out
+    </button>
+  `;
+}
+
+/* ---------------- ROOM MANAGEMENT ---------------- */
+
+function renderRoomEdit(){
+  if(!state.staff?.roles?.includes("Manager")){
+    return `
+      ${header("Manage rooms")}
+      <div class="card">
+        <h3>Manager access required</h3>
+        <p class="subtitle">
+          Only managers can add or edit room names.
+        </p>
+      </div>
+    `;
+  }
+
+  return `
+    ${header(
+      "Manage rooms",
+      "Manager only"
+    )}
+
+    <button class="primary" onclick="newRoom()">
+      Add room
+    </button>
+
+    <br><br>
+
+    ${
+      state.rooms.map(room=>`
+        <button
+          class="card-flat"
+          style="width:100%;text-align:left"
+          onclick="editRoom('${room.id}')">
+
+          <div style="display:flex;align-items:center;gap:12px">
+
+            <div class="feature-icon">
+              ${icons.rooms}
+            </div>
+
+            <div style="flex:1">
+              <strong>
+                ${esc(room.room_number)}
+                ${room.room_name
+                  ? " · " + esc(room.room_name)
+                  : ""
+                }
+              </strong>
+
+              <div class="small">
+                ${esc(room.room_type)}
+                · Floor ${room.floor}
+              </div>
+            </div>
+
+            ${statusBadge(room.status)}
+
+          </div>
+
+        </button>
+      `).join("")
+    }
+  `;
+}
+
+function newRoom(){
+  showModal(`
+    <div class="modal-head">
+      <div>
+        <h2>Add room</h2>
+        <div class="small">Manager only</div>
+      </div>
+
+      <button class="modal-close" onclick="closeModal()">
+        ${icons.close}
+      </button>
+    </div>
+
+    <div class="field">
+      <label>ROOM NUMBER</label>
+      <input id="new-room-number">
+    </div>
+
+    <div class="field">
+      <label>ROOM NAME</label>
+      <input id="new-room-name">
+    </div>
+
+    <div class="field">
+      <label>ROOM TYPE</label>
+      <select id="new-room-type">
+        <option>Standard</option>
+        <option>Deluxe</option>
+        <option>Suite</option>
+        <option>Penthouse</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>FLOOR</label>
+      <input id="new-room-floor" type="number" value="1">
+    </div>
+
+    <button class="primary" onclick="saveNewRoom()">
+      Add room
+    </button>
+  `);
+}
+
+async function saveNewRoom(){
+  try{
+    await db("rooms",{
+      method:"POST",
+      body:{
+        room_number:document.getElementById("new-room-number").value.trim(),
+        room_name:document.getElementById("new-room-name").value.trim(),
+        room_type:document.getElementById("new-room-type").value,
+        floor:Number(document.getElementById("new-room-floor").value||1),
+        status:"available",
+        housekeeping_status:"clean"
+      }
+    });
+
+    closeModal();
+    await refreshData();
+    navigate("roomedit");
+
+    toast("Room added.");
+
+  }catch(error){
+    console.error(error);
+    toast("Room could not be added.");
+  }
+}
+
+function editRoom(id){
+  const room=state.rooms.find(r=>r.id===id);
+
+  if(!room) return;
+
+  showModal(`
+    <div class="modal-head">
+      <div>
+        <h2>Edit room</h2>
+        <div class="small">
+          ${esc(room.room_number)}
+        </div>
+      </div>
+
+      <button class="modal-close" onclick="closeModal()">
+        ${icons.close}
+      </button>
+    </div>
+
+    <div class="field">
+      <label>ROOM NUMBER</label>
+      <input id="edit-room-number" value="${esc(room.room_number)}">
+    </div>
+
+    <div class="field">
+      <label>ROOM NAME</label>
+      <input id="edit-room-name" value="${esc(room.room_name || "")}">
+    </div>
+
+    <div class="field">
+      <label>ROOM TYPE</label>
+      <select id="edit-room-type">
+        ${["Standard","Deluxe","Suite","Penthouse"].map(t=>`
+          <option ${room.room_type===t?"selected":""}>
+            ${t}
+          </option>
+        `).join("")}
+      </select>
+    </div>
+
+    <div class="field">
+      <label>FLOOR</label>
+      <input id="edit-room-floor"
+        type="number"
+        value="${room.floor}">
+    </div>
+
+    <button class="primary" onclick="saveRoom('${id}')">
+      Save room
+    </button>
+  `);
+}
+
+async function saveRoom(id){
+  try{
+    await db("rooms",{
+      method:"PATCH",
+      query:"?id=eq."+encodeURIComponent(id),
+      body:{
+        room_number:document.getElementById("edit-room-number").value.trim(),
+        room_name:document.getElementById("edit-room-name").value.trim(),
+        room_type:document.getElementById("edit-room-type").value,
+        floor:Number(document.getElementById("edit-room-floor").value||1)
+      }
+    });
+
+    closeModal();
+    await refreshData();
+    navigate("roomedit");
+
+    toast("Room updated.");
+
+  }catch(error){
+    console.error(error);
+    toast("Room could not be updated.");
+  }
+}
+
+/* ---------------- CUSTOMER HISTORY ---------------- */
+
+function renderCustomerHistory(){
+  return `
+    ${header(
+      "Customers",
+      "Guest history"
+    )}
+
+    <div class="card">
+      <h2>${state.guests.length} customers</h2>
+      <p class="subtitle">
+        Every guest who has stayed at Fawnwood is retained here.
+      </p>
+    </div>
+
+    ${
+      state.guests.map(g=>`
+        <button
+          class="card-flat"
+          style="width:100%;text-align:left"
+          onclick="showCustomer('${g.id}')">
+
+          <strong>
+            ${esc(g.title || "")}
+            ${esc(g.first_name)}
+            ${esc(g.last_name)}
+          </strong>
+
+          <div class="small">
+            ${esc(g.username || "No username")}
+          </div>
+
+        </button>
+      `).join("")
+      ||
+      `<div class="card">No customers yet.</div>`
+    }
+  `;
+}
+
+function showCustomer(id){
+  const guest=state.guests.find(g=>g.id===id);
+
+  if(!guest) return;
+
+  const stays=state.reservations.filter(
+    r=>r.guest_id===id
+  );
+
+  showModal(`
+    <div class="modal-head">
+      <div>
+        <h2>
+          ${esc(guest.first_name)}
+          ${esc(guest.last_name)}
+        </h2>
+        <div class="small">Customer history</div>
+      </div>
+
+      <button class="modal-close" onclick="closeModal()">
+        ${icons.close}
+      </button>
+    </div>
+
+    <div class="card-flat">
+
+      <div class="detail-row">
+        <span class="detail-label">Username</span>
+        <span class="detail-value">
+          ${esc(guest.username || "—")}
+        </span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Visits</span>
+        <span class="detail-value">${stays.length}</span>
+      </div>
+
+    </div>
+
+    <h3>Previous stays</h3>
+
+    ${
+      stays.map(r=>`
+        <div class="card-flat">
+
+          <div class="detail-row">
+            <span class="detail-label">Room type</span>
+            <span class="detail-value">
+              ${esc(r.room_type)}
+            </span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-label">Board</span>
+            <span class="detail-value">
+              ${esc(r.board_basis)}
+            </span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-label">Nights</span>
+            <span class="detail-value">
+              ${r.nights}
+            </span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-label">Total</span>
+            <span class="detail-value">
+              ${money(r.total_price)}
+            </span>
+          </div>
+
+        </div>
+      `).join("")
+      ||
+      `<p class="subtitle">No previous stays.</p>`
+    }
+  `);
+}
+
+/* ---------------- CHECK-IN QUESTIONS ---------------- */
+
+function renderQuestions(){
+  if(!state.staff?.roles?.includes("Manager")){
+    return `
+      ${header("Check-in questions")}
+      <div class="card">
+        <h3>Manager access required</h3>
+      </div>
+    `;
+  }
+
+  return `
+    ${header(
+      "Check-in questions",
+      "Manager only"
+    )}
+
+    <div class="card">
+      <p class="subtitle">
+        These questions control the guest information collected
+        during reception.
+      </p>
+    </div>
+
+    ${
+      state.questions.map(q=>`
+        <div class="card-flat">
+
+          <strong>${esc(q.question)}</strong>
+
+          <div class="small">
+            Field: ${esc(q.field_name)}
+            · ${q.required ? "Required" : "Optional"}
+          </div>
+
+        </div>
+      `).join("")
+      ||
+      `<div class="card">No questions configured.</div>`
+    }
+
+    <button class="secondary" onclick="newQuestion()">
+      Add question
+    </button>
+  `;
+}
+
+function newQuestion(){
+  showModal(`
+    <div class="modal-head">
+      <div>
+        <h2>New question</h2>
+        <div class="small">Manager only</div>
+      </div>
+
+      <button class="modal-close" onclick="closeModal()">
+        ${icons.close}
+      </button>
+    </div>
+
+    <div class="field">
+      <label>QUESTION</label>
+      <input id="question-text">
+    </div>
+
+    <div class="field">
+      <label>FIELD NAME</label>
+      <input id="question-field">
+    </div>
+
+    <button class="primary" onclick="saveQuestion()">
+      Add question
+    </button>
+  `);
+}
+
+async function saveQuestion(){
+  const question=document.getElementById("question-text").value.trim();
+  const field=document.getElementById("question-field").value.trim();
+
+  if(!question || !field){
+    toast("Complete both fields.");
+    return;
+  }
+
+  try{
+    await db("checkin_questions",{
+      method:"POST",
+      body:{
+        question,
+        field_name:field,
+        required:false,
+        sort_order:state.questions.length+1,
+        active:true
+      }
+    });
+
+    closeModal();
+    await refreshData();
+    navigate("questions");
+
+    toast("Question added.");
+
+  }catch(error){
+    console.error(error);
+    toast("Question could not be saved.");
+  }
+}
+
+/* ---------------- GUIDE EDIT ---------------- */
+
+function renderGuideEdit(){
+  if(!state.staff?.roles?.includes("Manager")){
+    return `
+      ${header("Cleaning guide")}
+      <div class="card">
+        <h3>Manager access required</h3>
+      </div>
+    `;
+  }
+
+  return `
+    ${header(
+      "Cleaning guide",
+      "Manager only"
+    )}
+
+    <div class="card">
+      <p class="subtitle">
+        Define the exact standards housekeeping should follow.
+      </p>
+
+      <button class="primary" onclick="newGuideItem()">
+        Add standard
+      </button>
+    </div>
+
+    ${
+      state.guide.map(item=>`
+        <div class="card-flat">
+
+          <strong>${esc(item.title)}</strong>
+
+          <div class="small">
+            ${esc(item.description || "")}
+          </div>
+
+        </div>
+      `).join("")
+      ||
+      `<div class="card">No guide items.</div>`
+    }
+  `;
+}
+
+function newGuideItem(){
+  showModal(`
+    <div class="modal-head">
+      <div>
+        <h2>Add standard</h2>
+        <div class="small">Cleaning guide</div>
+      </div>
+
+      <button class="modal-close" onclick="closeModal()">
+        ${icons.close}
+      </button>
+    </div>
+
+    <div class="field">
+      <label>TITLE</label>
+      <input id="guide-title">
+    </div>
+
+    <div class="field">
+      <label>STANDARD</label>
+      <textarea id="guide-description"></textarea>
+    </div>
+
+    <button class="primary" onclick="saveGuideItem()">
+      Add standard
+    </button>
+  `);
+}
+
+async function saveGuideItem(){
+  const title=document.getElementById("guide-title").value.trim();
+  const description=
+    document.getElementById("guide-description").value.trim();
+
+  if(!title){
+    toast("Give the standard a title.");
+    return;
+  }
+
+  try{
+    await db("cleaning_guide",{
+      method:"POST",
+      body:{
+        title,
+        description,
+        category:"General",
+        sort_order:state.guide.length+1,
+        active:true
+      }
+    });
+
+    closeModal();
+    await refreshData();
+    navigate("guideedit");
+
+    toast("Cleaning standard added.");
+
+  }catch(error){
+    console.error(error);
+    toast("Could not save standard.");
+  }
+}
+
+/* ---------------- MODALS ---------------- */
+
+function showModal(content){
+  document.getElementById("modal-root").innerHTML=`
+    <div class="modal-backdrop" onclick="backdropClose(event)">
+      <div class="modal">
+        ${content}
+      </div>
+    </div>
+  `;
+}
+
+function backdropClose(event){
+  if(event.target.classList.contains("modal-backdrop")){
+    closeModal();
+  }
+}
+
+function closeModal(){
+  const root=document.getElementById("modal-root");
+
+  if(root){
+    root.innerHTML="";
+  }
+}
+
+/* ---------------- LOGOUT ---------------- */
+
+function logout(){
+  localStorage.removeItem("fawnwood_staff");
+  state.staff=null;
+  state.page="home";
+  showLogin();
+}
+
+/* ---------------- PAGE ROUTER ---------------- */
+
+function renderPage(){
+  const page=document.getElementById("page");
+
+  if(!page) return;
+
+  switch(state.page){
+
+    case "home":
+      page.innerHTML=renderHome();
+      break;
+
+    case "checkin":
+      page.innerHTML=renderCheckin();
+      break;
+
+    case "rooms":
+      page.innerHTML=renderRooms();
+      break;
+
+    case "amenities":
+      page.innerHTML=renderAmenities();
+      break;
+
+    case "housekeeping":
+      page.innerHTML=renderHousekeeping();
+      break;
+
+    case "maintenance":
+      page.innerHTML=renderMaintenance();
+      break;
+
+    case "roomservice":
+      page.innerHTML=renderRoomService();
+      break;
+
+    case "issues":
+      page.innerHTML=renderIssues();
+      break;
+
+    case "stats":
+      page.innerHTML=renderStats();
+      break;
+
+    case "settings":
+      page.innerHTML=renderSettings();
+      break;
+
+    case "roomedit":
+      page.innerHTML=renderRoomEdit();
+      break;
+
+    case "customerhistory":
+      page.innerHTML=renderCustomerHistory();
+      break;
+
+    case "questions":
+      page.innerHTML=renderQuestions();
+      break;
+
+    case "guideedit":
+      page.innerHTML=renderGuideEdit();
+      break;
+
+    default:
+      page.innerHTML=renderHome();
+  }
+}
+
+/* ---------------- STARTUP ---------------- */
+
+async function boot(){
+
+  const saved=localStorage.getItem("fawnwood_staff");
+
+  if(saved){
+    try{
+      state.staff=JSON.parse(saved);
+    }catch{
+      state.staff=null;
+    }
+  }
+
+  if(!state.staff){
+    showLogin();
+    return;
+  }
+
+  await refreshData();
+  render();
+}
+
+boot();
+
+</script>
+</body>
+</html>
